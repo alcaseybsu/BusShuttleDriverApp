@@ -6,6 +6,7 @@
 /Users/amber/BusShuttleDriver/BusShuttleDriver.Domain/obj/Debug/net8.0/BusShuttleDriver.Domain.AssemblyInfoInputs.cache
 /Users/amber/BusShuttleDriver/BusShuttleDriver.Domain/obj/Debug/net8.0/BusShuttleDriver.Domain.AssemblyInfo.cs
 /Users/amber/BusShuttleDriver/BusShuttleDriver.Domain/obj/Debug/net8.0/BusShuttleDriver.Domain.csproj.CoreCompileInputs.cache
+/Users/amber/BusShuttleDriver/BusShuttleDriver.Domain/obj/Debug/net8.0/BusShuttleDriver.Domain.sourcelink.json
 /Users/amber/BusShuttleDriver/BusShuttleDriver.Domain/obj/Debug/net8.0/BusShuttleDriver.Domain.dll
 /Users/amber/BusShuttleDriver/BusShuttleDriver.Domain/obj/Debug/net8.0/refint/BusShuttleDriver.Domain.dll
 /Users/amber/BusShuttleDriver/BusShuttleDriver.Domain/obj/Debug/net8.0/BusShuttleDriver.Domain.pdb

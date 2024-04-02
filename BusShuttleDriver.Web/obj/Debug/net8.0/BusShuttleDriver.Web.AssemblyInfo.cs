@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BusShuttleDriver.Web")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+681d68f7def18bb28cd7ae75104b1eda0992bfc8")]
 [assembly: System.Reflection.AssemblyProductAttribute("BusShuttleDriver.Web")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BusShuttleDriver.Web")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

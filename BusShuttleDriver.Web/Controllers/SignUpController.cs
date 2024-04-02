@@ -1,12 +1,9 @@
+using BusShuttleDriver.Data;
+using BusShuttleDriver.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using System.Threading.Tasks;
-using BusShuttleDriver.Data;
-using BusShuttleDriver.Domain.Models;
-using BusShuttleDriver.Web.ViewModels;
-using Microsoft.EntityFrameworkCore; // Ensure this namespace matches where your SignUpViewModel is located
+using Microsoft.EntityFrameworkCore;
 
 namespace BusShuttleDriver.Web.Controllers
 {
@@ -25,7 +22,7 @@ namespace BusShuttleDriver.Web.Controllers
         [AllowAnonymous]
         public IActionResult SignUp()
         {
-            return View(); // Returns the empty form view for a new user sign-up
+            return View();
         }
 
         [HttpPost]
@@ -35,23 +32,11 @@ namespace BusShuttleDriver.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser
-                {
-                    UserName = model.Username, // Use the built-in UserName property
-                    Firstname = model.Firstname,
-                    Lastname = model.Lastname
-                };
-
-                if (model.Password != null)
-                {
-                    user.Email = model.Password;
-                }
-
-                var result = await _userManager.CreateAsync(user, model.Password);
+                var user = new ApplicationUser { UserName = model.Username, Firstname = model.Firstname, Lastname = model.Lastname };
+                var result = await _userManager.CreateAsync(user, model.Password ?? "");
 
                 if (result.Succeeded)
                 {
-                    // Check if the roles exist before assigning them
                     if (!await _roleManager.RoleExistsAsync("Manager"))
                     {
                         await _roleManager.CreateAsync(new IdentityRole("Manager"));
@@ -62,30 +47,29 @@ namespace BusShuttleDriver.Web.Controllers
                     }
 
                     var isFirstUser = !await _userManager.Users.AnyAsync();
-                    var roleAssignmentResult = isFirstUser
-                        ? await _userManager.AddToRoleAsync(user, "Manager")
-                        : await _userManager.AddToRoleAsync(user, "Driver");
+                    if (isFirstUser)
+                    {
+                        await _userManager.AddToRoleAsync(user, "Manager");
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, "Driver");
+                    }
 
-                    // Optionally, sign in the user immediately after registration
-                    // await _signInManager.SignInAsync(user, isPersistent: false);
-
-                    // Redirect the user to the appropriate page after successful sign-up
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Login", "Account");
                 }
 
-                AddErrors(result);
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
-
-            // If we got this far, something failed, redisplay form
             return View(model);
-        }
-
-        private void AddErrors(IdentityResult result)
-        {
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
         }
     }
 }
+
+
+
+
+

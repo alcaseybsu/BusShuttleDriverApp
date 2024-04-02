@@ -272,6 +272,7 @@
 /Users/amber/BusShuttleDriver/BusShuttleDriver.Web/obj/Debug/net8.0/BusShuttleDriver.Web.MvcApplicationPartsAssemblyInfo.cache
 /Users/amber/BusShuttleDriver/BusShuttleDriver.Web/obj/Debug/net8.0/BusShuttleDriver.Web.RazorAssemblyInfo.cache
 /Users/amber/BusShuttleDriver/BusShuttleDriver.Web/obj/Debug/net8.0/BusShuttleDriver.Web.RazorAssemblyInfo.cs
+/Users/amber/BusShuttleDriver/BusShuttleDriver.Web/obj/Debug/net8.0/BusShuttleDriver.Web.sourcelink.json
 /Users/amber/BusShuttleDriver/BusShuttleDriver.Web/obj/Debug/net8.0/staticwebassets.build.json
 /Users/amber/BusShuttleDriver/BusShuttleDriver.Web/obj/Debug/net8.0/staticwebassets.development.json
 /Users/amber/BusShuttleDriver/BusShuttleDriver.Web/obj/Debug/net8.0/staticwebassets/msbuild.BusShuttleDriver.Web.Microsoft.AspNetCore.StaticWebAssets.props
