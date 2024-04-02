@@ -11,12 +11,6 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Configure HTTPS redirection to use the specific HTTPS port
-        builder.Services.AddHttpsRedirection(options =>
-        {
-            options.HttpsPort = 7232;
-        });
-
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlite(connectionString));
@@ -45,7 +39,7 @@ public class Program
 
         app.MapControllerRoute(
             name: "default",
-            pattern: "{controller=Home}/{action=Login}/{id?}");
+            pattern: "{controller=Account}/{action=Login}/{id?}");
 
         app.MapRazorPages();
 

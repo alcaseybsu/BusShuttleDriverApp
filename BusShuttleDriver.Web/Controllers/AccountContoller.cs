@@ -24,11 +24,16 @@ namespace BusShuttleDriver.Web.Controllers
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AccountController(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -45,15 +50,32 @@ namespace BusShuttleDriver.Web.Controllers
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = "/")
         {
             ViewData["ReturnUrl"] = returnUrl;
+
+            _logger.LogInformation("User {Username} is attempting to log in.", model.Username); // Log before attempt
+
             if (ModelState.IsValid)
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Username ?? "", model.Password ?? "", model.RememberMe, lockoutOnFailure: false);
+
                 if (result.Succeeded)
                 {
+                    _logger.LogInformation("User {Username} logged in successfully.", model.Username);
                     return LocalRedirect(returnUrl);
                 }
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                if (result.IsLockedOut)
+                {
+                    _logger.LogWarning("User {Username} account locked out.", model.Username);
+                    // Optionally, redirect to a lockout page or handle lockout
+                    ModelState.AddModelError(string.Empty, "Account locked out.");
+                }
+                else
+                {
+                    _logger.LogWarning("Invalid login attempt for user {Username}.", model.Username);
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                }
             }
+
+            // If we got this far, something failed, redisplay form
             return View(model);
         }
     }

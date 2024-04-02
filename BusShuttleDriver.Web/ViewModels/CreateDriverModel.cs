@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace BusShuttleDriver.Web.ViewModels
 {
     public class CreateDriverModel

@@ -34,8 +34,7 @@ namespace BusShuttleDriver.Controllers
                 {
                     Firstname = model.Firstname,
                     Lastname = model.Lastname,
-                    Username = model.Username,
-                    PasswordHash = model.Password,
+                    UserName = model.Username,
                     IsActive = true
                 };
 
@@ -59,8 +58,6 @@ namespace BusShuttleDriver.Controllers
             return View(model);
         }
 
-
-
         public async Task<IActionResult> Index()
         {
             var drivers = await _userManager.GetUsersInRoleAsync("Driver");
@@ -77,6 +74,8 @@ namespace BusShuttleDriver.Controllers
                 var result = await _userManager.UpdateAsync(user);
                 if (result.Succeeded)
                 {
+                    // Show a success message
+
                     // Redirect back to the list or to a success page
                     return RedirectToAction(nameof(Index));
                 }

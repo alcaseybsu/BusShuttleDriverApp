@@ -20,7 +20,8 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        return View();
+        // Redirects to the Login action in AccountController
+        return RedirectToAction("Login", "Account");
     }
 
     public IActionResult Privacy()

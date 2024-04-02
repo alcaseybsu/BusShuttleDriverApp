@@ -15,7 +15,7 @@ namespace BusShuttleDriver.Data
 
             // Build the configuration based on the environment
             IConfigurationRoot configuration = new ConfigurationBuilder()
-                .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../BusShuttleDriver.Web")) // Adjust if necessary
+                .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../BusShuttleDriver.Web"))
                 .AddJsonFile("appsettings.json", optional: true)
                 .AddJsonFile($"appsettings.{environmentName}.json", optional: true)
                 .Build();
