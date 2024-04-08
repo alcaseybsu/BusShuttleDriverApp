@@ -26,7 +26,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         base.OnModelCreating(modelBuilder);
 
         // Customize the ASP.NET Identity model and override the defaults if needed
-        // For example, you can rename the ASP.NET Identity table names and more
+        // For example, can rename the ASP.NET Identity table names, etc.
         modelBuilder.Entity<ApplicationUser>(entity => entity.ToTable(name: "Users"));
         modelBuilder.Entity<IdentityRole>(entity => entity.ToTable(name: "Roles"));
         modelBuilder.Entity<IdentityUserRole<string>>(entity => entity.ToTable(name: "UserRoles"));

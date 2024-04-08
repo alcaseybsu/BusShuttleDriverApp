@@ -28,15 +28,17 @@ namespace BusShuttleDriver.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateDriver(CreateDriverModel model)
         {
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser
                 {
+                    UserName = model.Email,
+                    Email = model.Email,
                     Firstname = model.Firstname,
                     Lastname = model.Lastname,
-                    UserName = model.Email, // Assuming email is used as username
                     IsActive = true
                 };
 
@@ -44,7 +46,7 @@ namespace BusShuttleDriver.Controllers
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(user, "Driver");
-                    return RedirectToAction("Index"); // Assuming this action exists for listing drivers or showing success
+                    return RedirectToAction("Index", "Manager");
                 }
                 foreach (var error in result.Errors)
                 {
@@ -70,9 +72,9 @@ namespace BusShuttleDriver.Controllers
                         Id = user.Id,
                         Firstname = user.Firstname,
                         Lastname = user.Lastname,
-                        Email = user.UserName, // Assuming the UserName property holds the email address
+                        Email = user.UserName,
                         IsActive = user.IsActive,
-                        Role = string.Join(", ", roles) // In case of multiple roles, join them. Otherwise, just display one.
+                        Role = string.Join(", ", roles) // In multiple roles, join them. Otherwise, display one.
                     });
                 }
             }
@@ -80,24 +82,23 @@ namespace BusShuttleDriver.Controllers
             return View(driversViewModels);
         }
 
-
-        public async Task<IActionResult> Activate(string id)
+        public async Task<IActionResult> ToggleActiveStatus(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
-                return NotFound($"User with ID {id} not found."); // Improved error handling
+                return NotFound($"User with ID {id} not found.");
             }
 
-            user.IsActive = true;
+            user.IsActive = !user.IsActive; // Toggle active status
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
-                TempData["SuccessMessage"] = "Driver activated successfully."; // Using TempData for success message
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
 
-            return View("Error"); // Generic error view
+            // Handle errors if update failed
+            return View("Error"); // Adjust as needed
         }
     }
 }

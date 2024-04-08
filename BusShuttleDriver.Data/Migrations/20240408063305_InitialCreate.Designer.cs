@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace BusShuttleDriver.Data
+namespace BusShuttleDriver.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240408041611_MigrationsCreate")]
-    partial class MigrationsCreate
+    [Migration("20240408063305_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,9 +71,6 @@ namespace BusShuttleDriver.Data
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Role")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("TEXT");
 
@@ -93,7 +90,7 @@ namespace BusShuttleDriver.Data
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.ToTable("AspNetUsers", (string)null);
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Account", b =>
@@ -246,7 +243,7 @@ namespace BusShuttleDriver.Data
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
-                    b.ToTable("AspNetRoles", (string)null);
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -269,7 +266,7 @@ namespace BusShuttleDriver.Data
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetRoleClaims", (string)null);
+                    b.ToTable("RoleClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -292,7 +289,7 @@ namespace BusShuttleDriver.Data
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserClaims", (string)null);
+                    b.ToTable("UserClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -314,7 +311,7 @@ namespace BusShuttleDriver.Data
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AspNetUserLogins", (string)null);
+                    b.ToTable("UserLogins", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -329,7 +326,7 @@ namespace BusShuttleDriver.Data
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetUserRoles", (string)null);
+                    b.ToTable("UserRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -348,7 +345,7 @@ namespace BusShuttleDriver.Data
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AspNetUserTokens", (string)null);
+                    b.ToTable("UserTokens", (string)null);
                 });
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Loop", b =>

@@ -1,0 +1,52 @@
+@model BusShuttleDriver.Web.ViewModels.BusCreateViewModel
+
+@{
+    ViewData["Title"] = "Add New Bus";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- Add Bus Form -->
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="NewBus.BusNumber" class="control-label">Bus Number</label>
+        <input asp-for="NewBus.BusNumber" class="form-control" />
+        <span asp-validation-for="NewBus.BusNumber" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Bus</button>
+</form>
+
+<!-- List of Existing Buses -->
+<h4>Existing Buses</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Bus Number</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var bus in Model.ExistingBuses)
+        {
+            <tr>
+                <td>@bus.BusNumber</td>
+                <td>
+                    <!-- Edit Link -->
+                    <a asp-action="Edit" asp-route-id="@bus.Id" class="btn btn-secondary">Edit</a>
+                    <!-- Delete Link -->
+                    <a asp-action="Delete" asp-route-id="@bus.Id" class="btn btn-danger"
+                        onclick="return confirm('Are you sure you want to delete this bus?');">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-controller="Driver" asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

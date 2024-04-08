@@ -4,6 +4,7 @@ using BusShuttleDriver.Domain.Models;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using BusShuttleDriver.Web.ViewModels;
 
 namespace BusShuttleDriver.Web.Controllers
 {
@@ -23,26 +24,34 @@ namespace BusShuttleDriver.Web.Controllers
         }
 
         // GET: Buses/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            var model = new BusCreateViewModel
+            {
+                ExistingBuses = await _context.Buses.ToListAsync()
+            };
+            return View(model);
         }
 
-        // POST: Buses/Create
+
+
         [HttpPost]
-        //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BusId")] Bus bus)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(BusCreateViewModel model)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(bus);
+                _context.Add(model.NewBus);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Create)); // Redirect back to the form
             }
-            return View(bus);
+            // If we got this far, something failed; redisplay form
+            model.ExistingBuses = _context.Buses.ToList(); // Reload existing buses to display
+            return View(model);
         }
 
-        // GET: Buses/Edit/5
+
+        // GET: Buses/Edit/id
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -56,6 +65,60 @@ namespace BusShuttleDriver.Web.Controllers
                 return NotFound();
             }
             return View(bus);
+        }
+
+        // POST: Buses/Edit/id
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,BusNumber")] Bus bus)
+        {
+            if (id != bus.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(bus);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!BusExists(bus.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Create));
+            }
+            return View(bus);
+        }
+
+        private bool BusExists(int id)
+        {
+            return _context.Buses.Any(e => e.Id == id);
+        }
+
+
+        // GET: Buses/Delete/id
+        public async Task<IActionResult> Delete(int? id)
+        {
+            var bus = await _context.Buses.FindAsync(id);
+            if (bus == null)
+            {
+                return NotFound();
+            }
+
+            _context.Buses.Remove(bus);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Create));
         }
     }
 }

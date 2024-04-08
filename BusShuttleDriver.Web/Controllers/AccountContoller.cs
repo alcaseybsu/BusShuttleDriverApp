@@ -8,7 +8,7 @@ If the user is successfully created, the method checks if
 the user is the first one to sign up and assigns them the Manager role. 
 For subsequent users, it assigns them the Driver role and sets them as 
 inactive for manager validation. Finally, the method redirects 
-the user to the login page or dashboard based on their role. 
+the user to the login page or dashboard (manager index page) based on their role. 
 If there are any errors during the process, the method adds them 
 to the ModelState and redisplay the form.
 */
@@ -22,7 +22,6 @@ using BusShuttleDriver.Domain.Models;
 using BusShuttleDriver.Web.ViewModels;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace BusShuttleDriver.Web.Controllers
 {
@@ -48,7 +47,7 @@ namespace BusShuttleDriver.Web.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Register()
+        public IActionResult SignUp()
         {
             return View();
         }
@@ -56,7 +55,7 @@ namespace BusShuttleDriver.Web.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(SignUpViewModel model)
+        public async Task<IActionResult> SignUp(SignUpViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -69,18 +68,11 @@ namespace BusShuttleDriver.Web.Controllers
                     IsActive = false
                 };
 
-                if (model.Password is null)
-                {
-                    ModelState.AddModelError(string.Empty, "Password cannot be null.");
-                    return View(model);
-                }
-                var result = await _userManager.CreateAsync(user, model.Password!);
-
+                var result = await _userManager.CreateAsync(user, model.Password ?? throw new InvalidOperationException("Password cannot be null."));
 
                 if (result.Succeeded)
                 {
                     var isFirstUser = (await _userManager.Users.CountAsync()) == 1;
-
                     string roleName = isFirstUser ? "Manager" : "Driver";
                     user.IsActive = isFirstUser;
 
@@ -89,18 +81,11 @@ namespace BusShuttleDriver.Web.Controllers
                     {
                         await _roleManager.CreateAsync(new IdentityRole(roleName));
                     }
-
                     await _userManager.AddToRoleAsync(user, roleName);
 
-                    if (isFirstUser)
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return RedirectToAction("Index", "Dashboard");
-                    }
-                    else
-                    {
-                        return RedirectToAction("Login", "Account");
-                    }
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+
+                    return isFirstUser ? RedirectToAction("Index", "Manager") : RedirectToAction("Login", "Account");
                 }
 
                 foreach (var error in result.Errors)
@@ -108,7 +93,6 @@ namespace BusShuttleDriver.Web.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-
             return View(model);
         }
 
@@ -129,9 +113,9 @@ namespace BusShuttleDriver.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                if (model.Username is null || model.Password is null)
+                if (model.Username == null || model.Password == null)
                 {
-                    ModelState.AddModelError(string.Empty, "Email or Password cannot be empty.");
+                    ModelState.AddModelError(string.Empty, "Username and password are required.");
                     return View(model);
                 }
                 var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, lockoutOnFailure: false);
@@ -139,16 +123,37 @@ namespace BusShuttleDriver.Web.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User {Email} logged in successfully.", model.Username);
-                    return LocalRedirect(returnUrl ?? "/");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return View(model);
-                }
-            }
 
+                    var user = await _userManager.FindByNameAsync(model.Username);
+                    if (user == null)
+                    {
+                        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                        return View(model);
+                    }
+                    if (await _userManager.IsInRoleAsync(user, "Manager"))
+                    {
+                        return RedirectToAction("Index", "Manager");
+                    }
+                    else if (await _userManager.IsInRoleAsync(user, "Driver"))
+                    {
+                        return RedirectToAction("Index", "Driver");
+                    }
+                    else
+                    {
+                        return LocalRedirect(returnUrl ?? "/");
+                    }
+                }
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            }
             return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> LogOut()
+        {
+            await _signInManager.SignOutAsync();
+            _logger.LogInformation("User logged out.");
+            return RedirectToAction(nameof(Login), "Account");
         }
     }
 }

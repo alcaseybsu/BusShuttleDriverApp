@@ -4,9 +4,11 @@ using BusShuttleDriver.Domain.Models;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusShuttleDriver.Web.Controllers
 {
+    [Authorize(Roles = "Driver")]
     public class EntryController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -31,10 +33,11 @@ namespace BusShuttleDriver.Web.Controllers
         // POST: Entries/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Timestamp,NumBoarded,NumLeft")] Entry entry)
+        public async Task<IActionResult> Create([Bind("Boarded,LeftBehind")] Entry entry)
         {
             if (ModelState.IsValid)
             {
+                entry.Timestamp = DateTime.Now; // Set current time as timestamp
                 _context.Add(entry);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

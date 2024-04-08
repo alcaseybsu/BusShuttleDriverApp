@@ -4,9 +4,11 @@ using BusShuttleDriver.Domain.Models;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusShuttleDriver.Web.Controllers
 {
+    [Authorize(Roles = "Driver")]
     public class DriverController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -14,6 +16,26 @@ namespace BusShuttleDriver.Web.Controllers
         public DriverController(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        // GET: Buses/Add
+        public IActionResult AddBus()
+        {
+            return View();
+        }
+
+        // POST: Buses/Add
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddBus([Bind("BusNumber")] Bus bus)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Buses.Add(bus);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index)); // Redirect to the appropriate action/view
+            }
+            return View(bus);
         }
 
         // GET: Drivers
@@ -37,7 +59,7 @@ namespace BusShuttleDriver.Web.Controllers
             {
                 _context.Add(driver);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "Manager");
             }
             return View(driver);
         }

@@ -4,7 +4,9 @@ namespace BusShuttleDriver.Web.ViewModels
 {
     public class SignUpViewModel
     {
+        [Display(Name = "First Name")]
         public string? Firstname { get; set; }
+        [Display(Name = "Last Name")]
         public string? Lastname { get; set; }
 
         [Display(Name = "Email")]

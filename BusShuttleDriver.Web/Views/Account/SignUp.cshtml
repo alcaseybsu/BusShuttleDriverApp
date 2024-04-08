@@ -1,6 +1,7 @@
 @model BusShuttleDriver.Web.ViewModels.SignUpViewModel
 
-<form asp-action="SignUp">
+
+<form asp-controller="Account" asp-action="SignUp" method="post">
     <div class="form-group">
         <label asp-for="Firstname" class="control-label"></label>
         <input asp-for="Firstname" class="form-control" />
