@@ -4,6 +4,8 @@ using BusShuttleDriver.Domain.Models;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using BusShuttleDriver.Web.ViewModels;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BusShuttleDriver.Web.Controllers
 {
@@ -25,8 +27,25 @@ namespace BusShuttleDriver.Web.Controllers
         // GET: Routes/Create
         public IActionResult Create()
         {
-            return View();
+            var viewModel = new RouteViewModel
+            {
+                Buses = GetBusesSelectList(), // Assume this method fetches buses and converts them into SelectListItems
+                Loops = GetLoopsSelectList() // Assume this method fetches loops and converts them into SelectListItems
+            };
+
+            return View(viewModel);
         }
+
+        private IEnumerable<SelectListItem> GetLoopsSelectList()
+        {
+            throw new NotImplementedException();
+        }
+
+        private IEnumerable<SelectListItem> GetBusesSelectList()
+        {
+            throw new NotImplementedException();
+        }
+
 
         // POST: Routes/Create
         [HttpPost]
