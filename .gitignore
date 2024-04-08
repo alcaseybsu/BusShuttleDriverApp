@@ -184,3 +184,5 @@ appsettings.*.json
 
 # Exclude user secrets file
 secrets.json
+
+.sqbpro
