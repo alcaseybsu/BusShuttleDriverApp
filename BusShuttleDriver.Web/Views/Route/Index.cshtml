@@ -1,10 +1,37 @@
-@model IEnumerable<BusShuttleDriver.Domain.Models.RouteModel>
+@model RouteIndexViewModel
 
 <h2>Routes</h2>
 
-<ul>
-@foreach (var route in Model)
+<!-- Existing Routes List -->
+@foreach (var route in Model.Routes)
 {
-    <li>@route.RouteName</li>
+    <p>@route.RouteName</p>
+    <p>@route.Loops</p>
+    <p>@route.Order</p>
+    // Other details of each route as needed
 }
-</ul>
+
+<!-- Create Route Form -->
+<h3>Create New Route</h3>
+<form asp-action="Create">
+    @* Include form fields for the new route here *@
+    @* Form for creating a new route, utilizing Model.NewRoute and Model.AvailableLoops *@
+    @* Optionally, include UI elements for adding stops to a specific route *@
+    <div class="form-group">
+        <label asp-for="NewRoute.RouteName" class="control-label">Route Name</label>
+        <input asp-for="NewRoute.RouteName" class="form-control" />
+        <span asp-validation-for="NewRoute.RouteName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="NewRoute.SelectedBusId" class="control-label">Bus</label>
+        <select asp-for="NewRoute.SelectedBusId" asp-items="Model.NewRoute.Buses" class="form-control"></select>
+        <span asp-validation-for="NewRoute.SelectedBusId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="NewRoute.SelectedLoopId" class="control-label">Loop</label>
+        <select asp-for="NewRoute.SelectedLoopId" asp-items="Model.NewRoute.Loops" class="form-control"></select>
+        <span asp-validation-for="NewRoute.SelectedLoopId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>

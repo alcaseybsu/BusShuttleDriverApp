@@ -21,9 +21,16 @@ namespace BusShuttleDriver.Web.Controllers
         // GET: Routes
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Routes.ToListAsync());
+            var viewModel = new RouteIndexViewModel
+            {
+                Routes = await _context.Routes.Include(r => r.Loops).ToListAsync(),
+                AvailableLoops = _context.Loops.Select(l => new SelectListItem { Value = l.LoopId.ToString(), Text = l.Name })
+            };
 
+            return View(viewModel);
         }
+
+
 
         // GET: Routes/Create
         public IActionResult Create()
@@ -75,7 +82,8 @@ namespace BusShuttleDriver.Web.Controllers
             // Repopulate dropdowns if returning to form
             routeViewModel.Buses = GetBusesSelectList();
             routeViewModel.Loops = GetLoopsSelectList();
-            return View(routeViewModel);
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Routes/Edit/5

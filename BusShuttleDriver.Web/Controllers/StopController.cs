@@ -16,6 +16,17 @@ namespace BusShuttleDriver.Web.Controllers
             _context = context;
         }
 
+        // GET: Stops for a given Loop ID
+        public async Task<IActionResult> GetStopsByLoop(int loopId)
+        {
+            var stops = await _context.Stops
+                .Where(s => s.LoopId == loopId) // Assuming there's a LoopId property in Stop model
+                .Select(s => new { id = s.Id, name = s.Name })
+                .ToListAsync();
+
+            return Json(stops);
+        }
+
         // GET: Stops
         public async Task<IActionResult> Index()
         {

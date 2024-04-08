@@ -13,7 +13,7 @@ namespace BusShuttleDriver.Domain.Models
         public double Latitude { get; set; }
         public double Longitude { get; set; }
 
-        public int LoopId { get; set; } // foreign key to Loop
+        public int LoopId { get; set; } // Foreign key to Loop
         public Loop? Loop { get; set; } // Navigation property
     }
 }
