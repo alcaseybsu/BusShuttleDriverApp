@@ -1,0 +1,58 @@
+@model BusShuttleDriver.Web.ViewModels.RouteViewModel
+
+@{
+    ViewData["Title"] = "Create Route";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Create">
+    <div class="form-group">
+        <label asp-for="RouteName" class="control-label">Route Name</label>
+        <input asp-for="RouteName" class="form-control" />
+        <span asp-validation-for="RouteName" class="text-danger"></span>
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="Order" class="control-label">Order</label>
+        <input asp-for="Order" type="number" class="form-control" />
+        <span asp-validation-for="Order" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="SelectedBusId" class="control-label">Bus</label>
+        <select asp-for="SelectedBusId" asp-items="Model.Buses" class="form-control"></select>
+        <span asp-validation-for="SelectedBusId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="SelectedLoopId" class="control-label">Loop</label>
+        <select asp-for="SelectedLoopId" asp-items="Model.Loops" class="form-control"></select>
+        <span asp-validation-for="SelectedLoopId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+
+<script>
+$(document).ready(function() {
+    $('#SelectedLoopId').change(function() {
+        var loopId = $(this).val();
+        $.ajax({
+            url: '/Stop/GetStopsByLoop', // Ensure you have a corresponding action
+            type: 'GET',
+            data: { loopId: loopId },
+            success: function(data) {
+                var stopsDropdown = $('#SelectedStopId'); // Adjust if you have this dropdown
+                stopsDropdown.empty();
+                $.each(data, function(index, item) {
+                    stopsDropdown.append($('<option>', { 
+                        value: item.id, 
+                        text : item.name 
+                    }));
+                });
+            }
+        });
+    });
+});
+</script>

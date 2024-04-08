@@ -3,6 +3,7 @@ using System;
 using BusShuttleDriver.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BusShuttleDriver.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240408204403_AddRouteNameColumn")]
+    partial class AddRouteNameColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.3");
@@ -212,15 +215,10 @@ namespace BusShuttleDriver.Data.Migrations
                     b.Property<double>("Longitude")
                         .HasColumnType("REAL");
 
-                    b.Property<int>("LoopId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LoopId");
 
                     b.ToTable("Stops");
                 });
@@ -358,17 +356,6 @@ namespace BusShuttleDriver.Data.Migrations
                     b.HasOne("BusShuttleDriver.Domain.Models.RouteModel", null)
                         .WithMany("Loops")
                         .HasForeignKey("RouteModelId");
-                });
-
-            modelBuilder.Entity("BusShuttleDriver.Domain.Models.Stop", b =>
-                {
-                    b.HasOne("BusShuttleDriver.Domain.Models.Loop", "Loop")
-                        .WithMany()
-                        .HasForeignKey("LoopId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Loop");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

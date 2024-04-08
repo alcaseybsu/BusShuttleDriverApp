@@ -22,6 +22,7 @@ namespace BusShuttleDriver.Web.Controllers
         public async Task<IActionResult> Index()
         {
             return View(await _context.Routes.ToListAsync());
+
         }
 
         // GET: Routes/Create
@@ -29,8 +30,8 @@ namespace BusShuttleDriver.Web.Controllers
         {
             var viewModel = new RouteViewModel
             {
-                Buses = GetBusesSelectList(), // Assume this method fetches buses and converts them into SelectListItems
-                Loops = GetLoopsSelectList() // Assume this method fetches loops and converts them into SelectListItems
+                Buses = GetBusesSelectList(),
+                Loops = GetLoopsSelectList()
             };
 
             return View(viewModel);
@@ -38,27 +39,43 @@ namespace BusShuttleDriver.Web.Controllers
 
         private IEnumerable<SelectListItem> GetLoopsSelectList()
         {
-            throw new NotImplementedException();
+            return _context.Loops.Select(l => new SelectListItem
+            {
+                Value = l.LoopId.ToString(),
+                Text = l.Name
+            }).ToList();
         }
 
         private IEnumerable<SelectListItem> GetBusesSelectList()
         {
-            throw new NotImplementedException();
+            return _context.Buses.Select(b => new SelectListItem
+            {
+                Value = b.Id.ToString(),
+                Text = b.BusNumber.ToString()
+            }).ToList();
         }
 
 
-        // POST: Routes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("RouteId,Color")] Route route)
+        public async Task<IActionResult> Create(RouteViewModel routeViewModel)
         {
             if (ModelState.IsValid)
             {
+                var route = new RouteModel
+                {
+                    RouteName = routeViewModel.RouteName,
+                    Order = routeViewModel.Order,
+                    // Assuming you have logic to associate loops and buses
+                };
                 _context.Add(route);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(route);
+            // Repopulate dropdowns if returning to form
+            routeViewModel.Buses = GetBusesSelectList();
+            routeViewModel.Loops = GetLoopsSelectList();
+            return View(routeViewModel);
         }
 
         // GET: Routes/Edit/5
