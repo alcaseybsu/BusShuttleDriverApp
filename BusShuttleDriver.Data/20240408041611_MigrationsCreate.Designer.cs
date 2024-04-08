@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace BusShuttleDriver.Data.Migrations
+namespace BusShuttleDriver.Data
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240402053512_InitalCreate")]
-    partial class InitalCreate
+    [Migration("20240408041611_MigrationsCreate")]
+    partial class MigrationsCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -118,11 +118,14 @@ namespace BusShuttleDriver.Data.Migrations
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Bus", b =>
                 {
-                    b.Property<int>("BusId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("BusId");
+                    b.Property<int>("BusNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
 
                     b.ToTable("Buses");
                 });
@@ -133,16 +136,13 @@ namespace BusShuttleDriver.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AccountId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Firstname")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Lastname")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Password")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Username")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -195,8 +195,8 @@ namespace BusShuttleDriver.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Color")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -209,7 +209,13 @@ namespace BusShuttleDriver.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Location")
+                    b.Property<double>("Latitude")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

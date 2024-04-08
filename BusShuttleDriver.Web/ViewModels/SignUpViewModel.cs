@@ -7,11 +7,12 @@ namespace BusShuttleDriver.Web.ViewModels
         public string? Firstname { get; set; }
         public string? Lastname { get; set; }
 
-        [Required(ErrorMessage = "Username is required.")]
-        public string? Username { get; set; }
+        [Display(Name = "Email")]
+        [Required(ErrorMessage = "Email is required.")]
+        public string? Username { get; set; } // Email
 
         [Required(ErrorMessage = "Password is required.")]
-        public required string? Password { get; set; }
+        public string? Password { get; set; }
         public bool IsActive { get; set; } = false;
     }
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using BusShuttleDriver.Web.ViewModels;
 using BusShuttleDriver.Domain.Models;
 using BusShuttleDriver.Data;
+
 
 namespace BusShuttleDriver.Controllers
 {
@@ -34,21 +36,15 @@ namespace BusShuttleDriver.Controllers
                 {
                     Firstname = model.Firstname,
                     Lastname = model.Lastname,
-                    UserName = model.Username,
+                    UserName = model.Email, // Assuming email is used as username
                     IsActive = true
                 };
 
-                if (model.Password is null)
-                {
-                    ModelState.AddModelError("Password", "Password is required");
-                    return View(model);
-                }
-
-                var result = await _userManager.CreateAsync(user, model.Password);
+                var result = await _userManager.CreateAsync(user, model.Password ?? string.Empty);
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(user, "Driver");
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction("Index"); // Assuming this action exists for listing drivers or showing success
                 }
                 foreach (var error in result.Errors)
                 {
@@ -60,27 +56,48 @@ namespace BusShuttleDriver.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var drivers = await _userManager.GetUsersInRoleAsync("Driver");
-            var inactiveDrivers = drivers.Where(d => !d.IsActive).ToList();
-            return View(inactiveDrivers);
+            var users = await _userManager.Users.ToListAsync();
+            var driverRoleName = "Driver";
+            var driversViewModels = new List<DriverViewModel>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Contains(driverRoleName))
+                {
+                    driversViewModels.Add(new DriverViewModel
+                    {
+                        Id = user.Id,
+                        Firstname = user.Firstname,
+                        Lastname = user.Lastname,
+                        Email = user.UserName, // Assuming the UserName property holds the email address
+                        IsActive = user.IsActive,
+                        Role = string.Join(", ", roles) // In case of multiple roles, join them. Otherwise, just display one.
+                    });
+                }
+            }
+
+            return View(driversViewModels);
         }
+
 
         public async Task<IActionResult> Activate(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
-            if (user != null)
+            if (user == null)
             {
-                user.IsActive = true;
-                var result = await _userManager.UpdateAsync(user);
-                if (result.Succeeded)
-                {
-                    // Show a success message
-
-                    // Redirect back to the list or to a success page
-                    return RedirectToAction(nameof(Index));
-                }
+                return NotFound($"User with ID {id} not found."); // Improved error handling
             }
-            return View("Error"); // Or handle errors as needed
+
+            user.IsActive = true;
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Driver activated successfully."; // Using TempData for success message
+                return RedirectToAction("Index");
+            }
+
+            return View("Error"); // Generic error view
         }
     }
 }
