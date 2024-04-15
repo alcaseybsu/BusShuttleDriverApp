@@ -48,7 +48,7 @@ namespace BusShuttleDriver.Web.Controllers
             {
                 var stop = new Stop
                 {
-                    Name = viewModel.Name,
+                    Name = viewModel?.Name,
                     Latitude = viewModel.Latitude,
                     Longitude = viewModel.Longitude
                 };
@@ -103,7 +103,7 @@ namespace BusShuttleDriver.Web.Controllers
                 return NotFound();
             }
 
-            stop.Name = viewModel.Name;
+            stop.Name = viewModel?.Name;
             stop.Latitude = viewModel.Latitude;
             stop.Longitude = viewModel.Longitude;
 

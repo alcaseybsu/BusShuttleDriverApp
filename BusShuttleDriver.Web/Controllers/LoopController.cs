@@ -44,7 +44,7 @@ namespace BusShuttleDriver.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var loop = new Loop { Name = viewModel.Name };
+                var loop = new Loop { Name = viewModel?.Name };
 
                 _context.Add(loop);
                 await _context.SaveChangesAsync();
@@ -96,7 +96,7 @@ namespace BusShuttleDriver.Web.Controllers
                     return NotFound();
                 }
 
-                loop.Name = viewModel.Name;
+                loop.Name = viewModel?.Name;
 
                 _context.Update(loop);
                 await _context.SaveChangesAsync();
