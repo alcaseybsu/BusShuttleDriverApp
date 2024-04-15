@@ -72,7 +72,7 @@ namespace BusShuttleDriver.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,BusNumber")] Bus bus)
         {
-            if (id != bus.Id)
+            if (id != bus.BusId)
             {
                 return NotFound();
             }
@@ -86,7 +86,7 @@ namespace BusShuttleDriver.Web.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!BusExists(bus.Id))
+                    if (!BusExists(bus.BusId))
                     {
                         return NotFound();
                     }
@@ -102,7 +102,7 @@ namespace BusShuttleDriver.Web.Controllers
 
         private bool BusExists(int id)
         {
-            return _context.Buses.Any(e => e.Id == id);
+            return _context.Buses.Any(e => e.BusId == id);
         }
 
 

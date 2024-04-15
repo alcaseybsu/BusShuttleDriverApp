@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using BusShuttleDriver.Data;
 using BusShuttleDriver.Domain.Models;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -59,6 +58,44 @@ namespace BusShuttleDriver.Web.Controllers
                 return NotFound();
             }
             return View(entry);
+        }
+
+        // POST: Entries/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Entry entry)
+        {
+            if (id != entry.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                _context.Update(entry);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(entry);
+        }
+
+        // GET: Entries/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var entry = await _context.Entries.FindAsync(id);
+            if (entry == null)
+            {
+                return NotFound();
+            }
+
+            _context.Entries.Remove(entry);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

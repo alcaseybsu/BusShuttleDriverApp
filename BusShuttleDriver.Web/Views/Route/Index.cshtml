@@ -1,37 +1,42 @@
-@model RouteIndexViewModel
+@model IEnumerable<BusShuttleDriver.Web.ViewModels.RouteViewModel> 
 
-<h2>Routes</h2>
-
-<!-- Existing Routes List -->
-@foreach (var route in Model.Routes)
-{
-    <p>@route.RouteName</p>
-    <p>@route.Loops</p>
-    <p>@route.Order</p>
-    // Other details of each route as needed
+@{
+    ViewData["Title"] = "Routes";
 }
 
-<!-- Create Route Form -->
-<h3>Create New Route</h3>
-<form asp-action="Create">
-    @* Include form fields for the new route here *@
-    @* Form for creating a new route, utilizing Model.NewRoute and Model.AvailableLoops *@
-    @* Optionally, include UI elements for adding stops to a specific route *@
-    <div class="form-group">
-        <label asp-for="NewRoute.RouteName" class="control-label">Route Name</label>
-        <input asp-for="NewRoute.RouteName" class="form-control" />
-        <span asp-validation-for="NewRoute.RouteName" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="NewRoute.SelectedBusId" class="control-label">Bus</label>
-        <select asp-for="NewRoute.SelectedBusId" asp-items="Model.NewRoute.Buses" class="form-control"></select>
-        <span asp-validation-for="NewRoute.SelectedBusId" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="NewRoute.SelectedLoopId" class="control-label">Loop</label>
-        <select asp-for="NewRoute.SelectedLoopId" asp-items="Model.NewRoute.Loops" class="form-control"></select>
-        <span asp-validation-for="NewRoute.SelectedLoopId" class="text-danger"></span>
-    </div>
+<h2>@ViewData["Title"]</h2>
 
-    <button type="submit" class="btn btn-primary">Create</button>
-</form>
+<!-- Link to Create Route -->
+<a asp-action="Create" class="btn btn-success">Create New Route</a>
+
+<!-- Existing Routes List -->
+<table class="table">
+    <thead>
+        <tr>
+            <th>Route Name</th>
+            <th>Bus Number</th>
+            <th>Loop</th>
+            <th>Stops</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var route in Model)
+    {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => route.RouteName)</td>
+            <td>@Html.DisplayFor(modelItem => route.BusNumber)</td> <!-- Assuming BusNumber is part of the RouteViewModel -->
+            <td>@route.LoopName</td> <!-- Ensure LoopName is part of your model -->
+            <td>
+                <!-- Display number of stops; clickable to expand -->
+                <a href="@Url.Action("Details", new { id = route.Id })">@route.Stops.Count</a>
+            </td>
+            <td>
+                <a href="@Url.Action("Edit", new { id = route.Id })" class="btn btn-secondary">Edit</a>
+                <a href="@Url.Action("EditStops", new { routeId = route.Id })" class="btn btn-primary">Manage Stops</a>
+                <a href="@Url.Action("Delete", new { id = route.Id })" class="btn btn-danger">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

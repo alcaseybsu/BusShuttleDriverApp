@@ -34,7 +34,32 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<IdentityUserLogin<string>>(entity => entity.ToTable(name: "UserLogins"));
         modelBuilder.Entity<IdentityRoleClaim<string>>(entity => entity.ToTable(name: "RoleClaims"));
         modelBuilder.Entity<IdentityUserToken<string>>(entity => entity.ToTable(name: "UserTokens"));
+
+        // Configure the Route to Bus relationship
+        modelBuilder.Entity<RouteModel>()
+            .HasOne(r => r.Bus) // Route has one Bus
+            .WithMany(b => b.Routes) // Bus has many Routes
+            .HasForeignKey(r => r.BusId); // Foreign key in Route
+
+        // Configure the Route to Loop relationship
+        modelBuilder.Entity<RouteModel>()
+            .HasOne(r => r.Loop) // Route has one Loop
+            .WithMany(l => l.Routes) // Loop has many Routes
+            .HasForeignKey(r => r.LoopId); // Foreign key in Route
+
+        // Configure the Stop to Route relationship
+        modelBuilder.Entity<Stop>()
+            .HasOne(s => s.Route) // Stop has one Route
+            .WithMany(r => r.Stops) // Route has many Stops
+            .HasForeignKey(s => s.RouteId) // Foreign key in Stop pointing to Route
+            .OnDelete(DeleteBehavior.Cascade); // Delete of stops if Route is deleted
+
+        // Ensure unique order for Stops within the same Route
+        modelBuilder.Entity<Stop>()
+            .HasIndex(s => new { s.RouteId, s.Order })
+            .IsUnique();
     }
 }
+
 
 

@@ -23,7 +23,7 @@ namespace BusShuttleDriver.Data
             var builder = new DbContextOptionsBuilder<ApplicationDbContext>();
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            builder.UseSqlite(connectionString); // Ensure this matches your actual database configuration
+            builder.UseSqlite(connectionString);
 
             return new ApplicationDbContext(builder.Options);
         }

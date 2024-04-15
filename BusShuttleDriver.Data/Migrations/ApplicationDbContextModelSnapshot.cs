@@ -112,14 +112,14 @@ namespace BusShuttleDriver.Data.Migrations
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Bus", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("BusId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("BusNumber")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
+                    b.HasKey("BusId");
 
                     b.ToTable("Buses");
                 });
@@ -166,19 +166,14 @@ namespace BusShuttleDriver.Data.Migrations
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Loop", b =>
                 {
-                    b.Property<int>("LoopId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("RouteModelId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("LoopId");
-
-                    b.HasIndex("RouteModelId");
+                    b.HasKey("Id");
 
                     b.ToTable("Loops");
                 });
@@ -189,6 +184,12 @@ namespace BusShuttleDriver.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("BusId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("LoopId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Order")
                         .HasColumnType("INTEGER");
 
@@ -196,6 +197,8 @@ namespace BusShuttleDriver.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LoopId");
 
                     b.ToTable("Routes");
                 });
@@ -216,6 +219,7 @@ namespace BusShuttleDriver.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -353,11 +357,15 @@ namespace BusShuttleDriver.Data.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("BusShuttleDriver.Domain.Models.Loop", b =>
+            modelBuilder.Entity("BusShuttleDriver.Domain.Models.RouteModel", b =>
                 {
-                    b.HasOne("BusShuttleDriver.Domain.Models.RouteModel", null)
-                        .WithMany("Loops")
-                        .HasForeignKey("RouteModelId");
+                    b.HasOne("BusShuttleDriver.Domain.Models.Loop", "Loop")
+                        .WithMany()
+                        .HasForeignKey("LoopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Loop");
                 });
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Stop", b =>
@@ -420,11 +428,6 @@ namespace BusShuttleDriver.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("BusShuttleDriver.Domain.Models.RouteModel", b =>
-                {
-                    b.Navigation("Loops");
                 });
 #pragma warning restore 612, 618
         }

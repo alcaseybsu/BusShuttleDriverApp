@@ -1,0 +1,54 @@
+@model BusShuttleDriver.Domain.Models.Entry
+
+@{
+    ViewData["Title"] = "Create Entry";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="Create" method="post" class="entry-form">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label asp-for="Boarded" class="control-label">Number Boarded</label>
+            <input asp-for="Boarded" class="form-control form-control-lg" />
+            <span asp-validation-for="Boarded" class="text-danger"></span>
+        </div>
+        <div class="form-group col-md-6">
+            <label asp-for="LeftBehind" class="control-label">Number Left Behind</label>
+            <input asp-for="LeftBehind" class="form-control form-control-lg" />
+            <span asp-validation-for="LeftBehind" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary btn-lg">Create</button>
+    </div>
+</form>
+
+<style>
+    .entry-form .form-row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .entry-form .form-group {
+        flex: 1;
+        /* Allows each input to take equal space */
+        min-width: 250px;
+        /* Ensures that the form does not collapse in narrow views */
+    }
+
+    .form-control-lg {
+        font-size: 1.25rem;
+        /* Larger font size for inputs */
+        height: calc(1.5em + 1rem + 2px);
+        /* Larger height for inputs */
+    }
+
+    .btn-lg {
+        padding: .5rem 1rem;
+        font-size: 1.25rem;
+        line-height: 1.5;
+        border-radius: .3rem;
+    }
+</style>

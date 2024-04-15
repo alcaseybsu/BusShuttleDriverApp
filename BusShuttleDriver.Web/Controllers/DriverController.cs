@@ -33,7 +33,7 @@ namespace BusShuttleDriver.Web.Controllers
             {
                 _context.Buses.Add(bus);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index)); // Redirect to the appropriate action/view
+                return RedirectToAction(nameof(Index));
             }
             return View(bus);
         }

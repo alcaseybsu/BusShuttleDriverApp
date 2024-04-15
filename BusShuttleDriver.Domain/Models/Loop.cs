@@ -7,8 +7,9 @@ namespace BusShuttleDriver.Domain.Models
 {
     public class Loop
     {
-        public int LoopId { get; set; }
-        public string? Name { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public ICollection<RouteModel> Routes { get; set; } = new List<RouteModel>(); // Collection to hold related routes
     }
 }
 

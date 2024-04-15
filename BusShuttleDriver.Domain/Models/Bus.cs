@@ -8,7 +8,9 @@ namespace BusShuttleDriver.Domain.Models
 {
     public class Bus
     {
-        public int Id { get; set; }
+        public int BusId { get; set; }
         public int BusNumber { get; set; }
+        public ICollection<RouteModel> Routes { get; set; } = new List<RouteModel>(); // To support navigation from Bus to Routes
     }
+
 }

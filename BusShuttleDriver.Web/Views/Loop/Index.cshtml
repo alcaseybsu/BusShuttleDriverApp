@@ -1,0 +1,26 @@
+@model IEnumerable<BusShuttleDriver.Web.ViewModels.LoopViewModel>
+
+<h2>Loops</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var loop in Model)
+    {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => loop.Name)</td>
+            <td>
+                <a href="@Url.Action("Edit", "Loop", new { id = loop.Id })" class="btn btn-primary">Edit</a>                
+                <a href="@Url.Action("Delete", "Loop", new { id = loop.Id })" class="btn btn-danger">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<a href="@Url.Action("Create", "Loop")" class="btn btn-success">Add New Loop</a>

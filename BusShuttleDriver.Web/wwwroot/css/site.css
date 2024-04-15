@@ -20,3 +20,101 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+
+/* Primary Colors */
+:root {
+  --cardinal-red: #BA0C2F;
+  --white: #FFFFFF;
+
+  /* Secondary Colors */
+  --black: #000000;
+  --dark-gray: #54585A;
+  --light-gray: #E6E7E8;
+  --dark-red: #79242F; /* Use carefully as specified */
+}
+
+body {
+  background-color: var(--white);
+  color: var(--black);
+}
+
+/* Navbar styling */
+.navbar {
+  background-color: var(--cardinal-red);
+  color: var(--white);
+}
+
+.navbar a {
+  color: var(--white);
+  transition: color 0.3s;
+}
+
+.navbar a:hover {
+  color: var(--light-gray);
+}
+
+/* Highlighting 'Start Route' */
+.navbar .start-route {
+  background-color: var(--white);
+  color: var(--cardinal-red);
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+/* Sidebar and callouts using secondary colors */
+.sidebar {
+  background-color: var(--dark-gray);
+  color: var(--white);
+}
+
+.callout {
+  border-left: 5px solid var(--dark-red);
+  padding: 10px;
+  background-color: var(--light-gray);
+}
+
+/* Table styling */
+table {
+  border-color: var(--dark-gray);
+}
+
+th {
+  background-color: var(--cardinal-red);
+  color: var(--white);
+}
+
+td {
+  background-color: var(--white);
+  color: var(--black);
+}
+
+/* Button styling */
+button, .btn {
+  background-color: var(--cardinal-red);
+  color: var(--white);
+}
+
+button:hover, .btn:hover {
+  background-color: var(--dark-red);
+  color: var(--white);
+}
+
+/* Navbar Styles */
+.navbar {
+  background-color: #BA0C2F; /* Cardinal Red */
+  color: #FFFFFF; /* White */
+}
+
+.navbar a, .navbar a:hover, .navbar a:focus {
+  color: #FFFFFF; /* White */
+}
+
+/* Highlight "Start Route" specifically */
+.navbar .start-route {
+  background-color: #FFFFFF; /* White */
+  color: #BA0C2F; /* Cardinal Red */
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+

@@ -12,9 +12,13 @@ namespace BusShuttleDriver.Domain.Models
 
         [Display(Name = "Date & Time")]
         public DateTime Timestamp { get; set; }
+
+        [Display(Name = "Boarded")]
+        [Required(ErrorMessage = "Number Boarded is required")]
         public int Boarded { get; set; }
 
         [Display(Name = "Left Behind")]
+        [Required(ErrorMessage = "Number Left Behind is required")]
         public int LeftBehind { get; set; }
     }
 }

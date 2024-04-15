@@ -1,4 +1,4 @@
-@model BusShuttleDriver.Web.ViewModels.RouteViewModel
+@model BusShuttleDriver.Web.ViewModels.RouteCreateModel
 
 @{
     ViewData["Title"] = "Create Route";
@@ -6,53 +6,56 @@
 
 <h2>@ViewData["Title"]</h2>
 
-<form asp-action="Create">
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
     <div class="form-group">
         <label asp-for="RouteName" class="control-label">Route Name</label>
         <input asp-for="RouteName" class="form-control" />
         <span asp-validation-for="RouteName" class="text-danger"></span>
     </div>
-    
-    <div class="form-group">
-        <label asp-for="Order" class="control-label">Order</label>
-        <input asp-for="Order" type="number" class="form-control" />
-        <span asp-validation-for="Order" class="text-danger"></span>
-    </div>
 
     <div class="form-group">
         <label asp-for="SelectedBusId" class="control-label">Bus</label>
-        <select asp-for="SelectedBusId" asp-items="Model.Buses" class="form-control"></select>
+        <select asp-for="SelectedBusId" asp-items="Model.AvailableBuses" class="form-control"></select>
         <span asp-validation-for="SelectedBusId" class="text-danger"></span>
     </div>
 
     <div class="form-group">
         <label asp-for="SelectedLoopId" class="control-label">Loop</label>
-        <select asp-for="SelectedLoopId" asp-items="Model.Loops" class="form-control"></select>
+        <select asp-for="SelectedLoopId" asp-items="Model.AvailableLoops" class="form-control"></select>
         <span asp-validation-for="SelectedLoopId" class="text-danger"></span>
     </div>
+
+    <div class="form-group">
+        <label asp-for="SelectedStopIds" class="control-label">Stops</label>
+        <select asp-for="SelectedStopIds" asp-items="Model.AvailableStops" multiple class="form-control"
+            id="stopsList"></select>
+        <span asp-validation-for="SelectedStopIds" class="text-danger"></span>
+    </div>
+
+    <button type="button" id="moveUp">Move Up</button>
+    <button type="button" id="moveDown">Move Down</button>
 
     <button type="submit" class="btn btn-primary">Create</button>
 </form>
 
 <script>
-$(document).ready(function() {
-    $('#SelectedLoopId').change(function() {
-        var loopId = $(this).val();
-        $.ajax({
-            url: '/Stop/GetStopsByLoop', // Ensure you have a corresponding action
-            type: 'GET',
-            data: { loopId: loopId },
-            success: function(data) {
-                var stopsDropdown = $('#SelectedStopId'); // Adjust if you have this dropdown
-                stopsDropdown.empty();
-                $.each(data, function(index, item) {
-                    stopsDropdown.append($('<option>', { 
-                        value: item.id, 
-                        text : item.name 
-                    }));
-                });
+    $(document).ready(function () {
+        // Move selected item up
+        $('#moveUp').click(function () {
+            var selectedOption = $('#stopsList option:selected');
+            if (selectedOption.index() > 0) {
+                selectedOption.prev().before(selectedOption);
+            }
+        });
+
+        // Move selected item down
+        $('#moveDown').click(function () {
+            var selectedOption = $('#stopsList option:selected');
+            if (selectedOption.index() < $('#stopsList option').length - 1) {
+                selectedOption.next().after(selectedOption);
             }
         });
     });
-});
 </script>

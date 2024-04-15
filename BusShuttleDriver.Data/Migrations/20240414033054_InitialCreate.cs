@@ -30,13 +30,13 @@ namespace BusShuttleDriver.Data.Migrations
                 name: "Buses",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    BusId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     BusNumber = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Buses", x => x.Id);
+                    table.PrimaryKey("PK_Buses", x => x.BusId);
                 });
 
             migrationBuilder.CreateTable(
@@ -61,12 +61,25 @@ namespace BusShuttleDriver.Data.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    NumBoarded = table.Column<int>(type: "INTEGER", nullable: false),
-                    NumLeft = table.Column<int>(type: "INTEGER", nullable: false)
+                    Boarded = table.Column<int>(type: "INTEGER", nullable: false),
+                    LeftBehind = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Entries", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Loops",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Loops", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -81,34 +94,6 @@ namespace BusShuttleDriver.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Routes",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Order = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Routes", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Stops",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Latitude = table.Column<double>(type: "REAL", nullable: false),
-                    Longitude = table.Column<double>(type: "REAL", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Stops", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -140,6 +125,50 @@ namespace BusShuttleDriver.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Routes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    RouteName = table.Column<string>(type: "TEXT", nullable: true),
+                    Order = table.Column<int>(type: "INTEGER", nullable: false),
+                    BusId = table.Column<int>(type: "INTEGER", nullable: false),
+                    LoopId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Routes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Routes_Loops_LoopId",
+                        column: x => x.LoopId,
+                        principalTable: "Loops",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Stops",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Latitude = table.Column<double>(type: "REAL", nullable: false),
+                    Longitude = table.Column<double>(type: "REAL", nullable: false),
+                    LoopId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Stops", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Stops_Loops_LoopId",
+                        column: x => x.LoopId,
+                        principalTable: "Loops",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RoleClaims",
                 columns: table => new
                 {
@@ -158,25 +187,6 @@ namespace BusShuttleDriver.Data.Migrations
                         principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Loops",
-                columns: table => new
-                {
-                    LoopId = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    RouteModelId = table.Column<int>(type: "INTEGER", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Loops", x => x.LoopId);
-                    table.ForeignKey(
-                        name: "FK_Loops_Routes_RouteModelId",
-                        column: x => x.RouteModelId,
-                        principalTable: "Routes",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -265,11 +275,6 @@ namespace BusShuttleDriver.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Loops_RouteModelId",
-                table: "Loops",
-                column: "RouteModelId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_RoleClaims_RoleId",
                 table: "RoleClaims",
                 column: "RoleId");
@@ -279,6 +284,16 @@ namespace BusShuttleDriver.Data.Migrations
                 table: "Roles",
                 column: "NormalizedName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Routes_LoopId",
+                table: "Routes",
+                column: "LoopId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Stops_LoopId",
+                table: "Stops",
+                column: "LoopId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserClaims_UserId",
@@ -323,10 +338,10 @@ namespace BusShuttleDriver.Data.Migrations
                 name: "Entries");
 
             migrationBuilder.DropTable(
-                name: "Loops");
+                name: "RoleClaims");
 
             migrationBuilder.DropTable(
-                name: "RoleClaims");
+                name: "Routes");
 
             migrationBuilder.DropTable(
                 name: "Stops");
@@ -344,7 +359,7 @@ namespace BusShuttleDriver.Data.Migrations
                 name: "UserTokens");
 
             migrationBuilder.DropTable(
-                name: "Routes");
+                name: "Loops");
 
             migrationBuilder.DropTable(
                 name: "Roles");

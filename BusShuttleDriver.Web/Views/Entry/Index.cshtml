@@ -1,0 +1,42 @@
+@model IEnumerable<BusShuttleDriver.Domain.Models.RouteModel>
+
+@{
+    ViewData["Title"] = "Routes";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (!Model.Any())
+{
+    <p>No routes have been created yet.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Route Name</th>
+                <th>Loop</th>
+                <th>Order</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var route in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => route.RouteName)</td>
+                    <td>@Html.DisplayFor(modelItem => route.Loop.Name)</td>
+                    <td>@Html.DisplayFor(modelItem => route.Order)</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@route.Id" class="btn btn-primary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@route.Id" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="Create" asp-controller="Route" class="btn btn-success">Create Route</a>
+
