@@ -1,26 +1,20 @@
+@model BusShuttleDriver.Web.ViewModels.StartRouteViewModel
+
 @{
     ViewData["Title"] = "Driver Dashboard";
 }
 
-<div class="d-flex" id="wrapper">
-    <!-- Sidebar -->
-    <div class="bg-light border-right" id="sidebar-wrapper">
-        <div class="sidebar-heading">Driver Actions</div>
-        <div class="list-group list-group-flush">
-            <a href="@Url.Action("Create","Bus")" class="list-group-item list-group-item-action bg-light">Manage Bus</a>
-            <a href="@Url.Action("Index","Route")" class="list-group-item list-group-item-action bg-light">Manage Routes</a>
-            <a href="@Url.Action("Index","Loop")" class="list-group-item list-group-item-action bg-light">Manage Loops</a>
-            <a href="@Url.Action("Index","Stop")" class="list-group-item list-group-item-action bg-light">Manage Stops</a>
-            <a href="@Url.Action("Create","Entry")" class="list-group-item list-group-item-action bg-light">Start Route</a>
-            <a href="@Url.Action("Index","Report")" class="list-group-item list-group-item-action bg-light">View Reports</a>
+<div class="container mt-5">
+    <h1 class="display-4 text-center">Start Your Route</h1>
+    <form asp-action="StartRoute" method="post" class="mt-4">
+        <div class="form-group">
+            <label for="loopSelect" class="h3">Select Loop:</label>
+            <select id="loopSelect" asp-for="SelectedLoopId" asp-items="Model.AvailableLoops" class="form-control form-control-lg"></select>
         </div>
-    </div>
-
-    <!-- Page Content -->
-    <div id="page-content-wrapper">
-        <div class="container-fluid">
-            <h1 class="mt-4">Driver Dashboard</h1>
-            <p>Select an action from the left to get started.</p>
+        <div class="form-group">
+            <label for="busSelect" class="h3">Select Bus:</label>
+            <select id="busSelect" asp-for="SelectedBusId" asp-items="Model.AvailableBuses" class="form-control form-control-lg"></select>
         </div>
-    </div>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Start Route</button>
+    </form>
 </div>

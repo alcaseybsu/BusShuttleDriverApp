@@ -1,29 +1,75 @@
-@model BusShuttleDriver.Domain.Models.Entry
+@model BusShuttleDriver.Web.ViewModels.EntryViewModel  // Assuming you have a view model that includes stop information and a list of next stops.
 
 @{
-    ViewData["Title"] = "Create Entry";
+    ViewData["Title"] = "Route Entry";
 }
 
 <h1>@ViewData["Title"]</h1>
 
-<form asp-action="Create" method="post" class="entry-form">
+<form asp-action="SubmitEntry" method="post" class="entry-form" id="entryForm">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label asp-for="Boarded" class="control-label">Number Boarded</label>
-            <input asp-for="Boarded" class="form-control form-control-lg" />
-            <span asp-validation-for="Boarded" class="text-danger"></span>
-        </div>
-        <div class="form-group col-md-6">
-            <label asp-for="LeftBehind" class="control-label">Number Left Behind</label>
-            <input asp-for="LeftBehind" class="form-control form-control-lg" />
-            <span asp-validation-for="LeftBehind" class="text-danger"></span>
-        </div>
-    </div>
+    
+    <!-- Stop Selector -->
     <div class="form-group">
-        <button type="submit" class="btn btn-primary btn-lg">Create</button>
+        <label asp-for="SelectedStopId" class="control-label">Current Stop</label>
+        <select asp-for="SelectedStopId" asp-items="Model.AvailableStops" class="form-control form-control-lg" onchange="autoAdvance()">
+        </select>
+    </div>
+
+    <!-- Number Boarded -->
+    <div class="form-group">
+        <label asp-for="Boarded" class="control-label">Number Boarded</label>
+        <input asp-for="Boarded" class="form-control form-control-lg" />
+        <span asp-validation-for="Boarded" class="text-danger"></span>
+    </div>
+
+    <!-- Number Left Behind -->
+    <div class="form-group">
+        <label asp-for="LeftBehind" class="control-label">Number Left Behind</label>
+        <input asp-for="LeftBehind" class="form-control form-control-lg" />
+        <span asp-validation-for="LeftBehind" class="text-danger"></span>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary btn-lg">Submit</button>
     </div>
 </form>
+
+<!-- End Route Button appears after the last stop is completed -->
+<button type="button" class="btn btn-danger btn-lg" id="endRouteBtn" style="display:none;">End Route</button>
+
+<script>
+    document.getElementById('entryForm').addEventListener('submit', function(e) {
+    e.preventDefault();  // Prevent the normal form submission
+
+    const formData = new FormData(this);
+
+    fetch('@Url.Action("SubmitEntry", "Entry")', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'  // Important for ASP.NET Core to recognize AJAX request
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            var select = document.getElementById('SelectedStopId');
+            if (select.selectedIndex < select.options.length - 1) {
+                select.selectedIndex++;  // Move to next stop
+            } else {
+                // Last stop, show End Route button
+                document.getElementById('endRouteBtn').style.display = 'block';
+            }
+        } else {
+            alert('Failed to save entry. Please try again.');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+</script>
+
 
 <style>
     .entry-form .form-row {

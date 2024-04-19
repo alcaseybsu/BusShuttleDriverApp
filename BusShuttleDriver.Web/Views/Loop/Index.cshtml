@@ -1,11 +1,16 @@
 @model IEnumerable<BusShuttleDriver.Web.ViewModels.LoopViewModel>
 
-<h2>Loops</h2>
+@{
+    ViewData["Title"] = "Loop Index";
+}
+
+<h2>@ViewData["Title"]</h2>
 
 <table class="table">
     <thead>
         <tr>
             <th>Name</th>
+            <th>Details</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -14,13 +19,16 @@
     {
         <tr>
             <td>@Html.DisplayFor(modelItem => loop.Name)</td>
+            <td><a asp-action="Details" asp-route-id="@loop.Id">View Details</a></td>
             <td>
-                <a href="@Url.Action("Edit", "Loop", new { id = loop.Id })" class="btn btn-primary">Edit</a>                
-                <a href="@Url.Action("Delete", "Loop", new { id = loop.Id })" class="btn btn-danger">Delete</a>
+                <a asp-action="Edit" asp-route-id="@loop.Id">Edit</a>
+                <a asp-action="Delete" asp-route-id="@loop.Id">Delete</a>
             </td>
         </tr>
     }
     </tbody>
 </table>
+
+<a asp-controller="Home" asp-action="Index" class="btn btn-primary">Back to Dashboard</a>
 
 <a href="@Url.Action("Create", "Loop")" class="btn btn-success">Add New Loop</a>

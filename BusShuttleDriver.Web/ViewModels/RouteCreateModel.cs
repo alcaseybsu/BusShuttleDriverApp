@@ -28,6 +28,7 @@ namespace BusShuttleDriver.Web.ViewModels
         public List<SelectListItem> AvailableStops { get; set; } = new List<SelectListItem>();
 
         public List<int> SelectedStopIds { get; set; }
+        public string OrderedStopIds { get; set; }  // Init as string
 
         public RouteCreateModel()
         {
@@ -35,6 +36,7 @@ namespace BusShuttleDriver.Web.ViewModels
             AvailableLoops = new List<SelectListItem>();
             AvailableStops = new List<SelectListItem>();
             SelectedStopIds = new List<int>();
+            OrderedStopIds = "";  // Init as empty string
         }
     }
 }

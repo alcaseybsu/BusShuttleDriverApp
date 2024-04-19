@@ -13,6 +13,7 @@ namespace BusShuttleDriver.Web.ViewModels
         public string? LoopName { get; set; }
         public int StopsCount { get; set; }
         public List<StopViewModel> Stops { get; set; }
+        public int Order { get; set; }
 
         public RouteViewModel()
         {

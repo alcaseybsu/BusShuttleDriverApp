@@ -3,6 +3,7 @@ using System;
 using BusShuttleDriver.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BusShuttleDriver.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240419091526_FixStopsOrder")]
+    partial class FixStopsOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.3");
@@ -166,7 +169,7 @@ namespace BusShuttleDriver.Data.Migrations
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Loop", b =>
                 {
-                    b.Property<int?>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -188,7 +191,7 @@ namespace BusShuttleDriver.Data.Migrations
                     b.Property<int>("BusId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("LoopId")
+                    b.Property<int>("LoopId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Order")
@@ -225,7 +228,7 @@ namespace BusShuttleDriver.Data.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("RouteId")
+                    b.Property<int>("RouteId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -375,7 +378,8 @@ namespace BusShuttleDriver.Data.Migrations
                     b.HasOne("BusShuttleDriver.Domain.Models.Loop", "Loop")
                         .WithMany("Routes")
                         .HasForeignKey("LoopId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Bus");
 
@@ -387,7 +391,8 @@ namespace BusShuttleDriver.Data.Migrations
                     b.HasOne("BusShuttleDriver.Domain.Models.RouteModel", "Route")
                         .WithMany("Stops")
                         .HasForeignKey("RouteId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Route");
                 });

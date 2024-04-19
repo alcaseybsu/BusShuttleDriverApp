@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using BusShuttleDriver.Web.ViewModels;
+using BusShuttleDriver.Web.Models;
 
 namespace BusShuttleDriver.Web.Controllers
 {
@@ -44,7 +45,17 @@ namespace BusShuttleDriver.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var loop = new Loop { Name = viewModel?.Name };
+                if (viewModel == null)
+                {
+                    throw new ArgumentNullException(nameof(viewModel));
+                }
+
+                if (viewModel.Name == null)
+                {
+                    throw new ArgumentException("ViewModel.Name is null", nameof(viewModel));
+                }
+
+                var loop = new Loop { Name = viewModel.Name };
 
                 _context.Add(loop);
                 await _context.SaveChangesAsync();
@@ -96,7 +107,12 @@ namespace BusShuttleDriver.Web.Controllers
                     return NotFound();
                 }
 
-                loop.Name = viewModel?.Name;
+                if (viewModel.Name == null)
+                {
+                    throw new ArgumentException("ViewModel.Name is null", nameof(viewModel));
+                }
+
+                loop.Name = viewModel.Name;
 
                 _context.Update(loop);
                 await _context.SaveChangesAsync();
@@ -114,15 +130,25 @@ namespace BusShuttleDriver.Web.Controllers
                 return NotFound();
             }
 
-            var loop = await _context.Loops.FindAsync(id);
+            var loop = await _context.Loops
+                .Include(l => l.Routes)
+                .FirstOrDefaultAsync(l => l.Id == id);
+
             if (loop == null)
             {
                 return NotFound();
+            }
+
+            if (loop.Routes.Any())
+            {
+                // Handle the case where routes still reference this loop                
+                return View("Error", new ErrorViewModel { Message = "Cannot delete loop because it has associated routes." });
             }
 
             _context.Loops.Remove(loop);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
     }
 }
