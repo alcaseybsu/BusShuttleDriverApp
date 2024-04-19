@@ -1,4 +1,4 @@
-@model IEnumerable<BusShuttleDriver.Web.ViewModels.RouteViewModel> 
+@model IEnumerable<BusShuttleDriver.Web.ViewModels.RouteViewModel>
 
 @{
     ViewData["Title"] = "Routes";
@@ -21,22 +21,57 @@
         </tr>
     </thead>
     <tbody>
-    @foreach (var route in Model)
-    {
-        <tr>
-            <td>@Html.DisplayFor(modelItem => route.RouteName)</td>
-            <td>@Html.DisplayFor(modelItem => route.BusNumber)</td> <!-- Assuming BusNumber is part of the RouteViewModel -->
-            <td>@route.LoopName</td> <!-- Ensure LoopName is part of your model -->
-            <td>
-                <!-- Display number of stops; clickable to expand -->
-                <a href="@Url.Action("Details", new { id = route.Id })">@route.Stops.Count</a>
-            </td>
-            <td>
-                <a href="@Url.Action("Edit", new { id = route.Id })" class="btn btn-secondary">Edit</a>
-                <a href="@Url.Action("EditStops", new { routeId = route.Id })" class="btn btn-primary">Manage Stops</a>
-                <a href="@Url.Action("Delete", new { id = route.Id })" class="btn btn-danger">Delete</a>
-            </td>
-        </tr>
-    }
+        @foreach (var route in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => route.RouteName)</td>
+                <td>@Html.DisplayFor(modelItem => route.BusNumber)</td>
+                <td>@Html.DisplayFor(modelItem => route.LoopName)</td>
+                <td>
+                    <!-- Display number of stops; click to view details -->
+                    <a asp-action="Details" asp-route-id="@route.Id">Stops (@route.StopsCount)</a>
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@route.Id" class="btn btn-secondary">Edit</a>
+                    <a asp-action="EditStops" asp-route-id="@route.Id" class="btn btn-primary">Manage Stops</a>
+                    <button class="btn btn-danger delete-route" data-route-id="@route.Id">Delete</button>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+<!-- Delete Route form -->
+<form id="delete-form" asp-action="Delete" method="post" style="display: none;">
+    <input type="hidden" name="id" id="route-id-for-deletion" />
+    <div class="form-group">
+        <h4>Are you sure you want to delete this route?</h4>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Confirm" class="btn btn-danger" id="confirm-button" />
+        <button type="button" class="btn btn-default cancel-button">Cancel</button>
+    </div>
+</form>
+
+@section scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.delete-route').click(function (e) {
+                e.preventDefault();
+
+                var routeId = $(this).data('route-id');
+
+                // Set the route ID - hidden input
+                $('#route-id-for-deletion').val(routeId);
+
+                // Show the form
+                $('#delete-form').show();
+            });
+
+            $('.cancel-button').click(function () {
+                $('#delete-form').hide();
+            });
+        });
+    </script>
+}

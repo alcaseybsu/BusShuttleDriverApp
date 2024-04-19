@@ -82,29 +82,53 @@ namespace BusShuttleDriver.Web.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> Edit(int? id)
+        // POST: Routes/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(RouteCreateModel model)
         {
-            var route = await _context.Routes.FindAsync(id);
-            var model = new RouteCreateModel
+            if (ModelState.IsValid)
             {
-                Id = route.Id,
-                RouteName = route.RouteName,
-                Order = route.Order,
-                SelectedBusId = route.BusId,
-                SelectedLoopId = route.LoopId,
-                AvailableBuses = await _context.Buses.Select(b => new SelectListItem
+                var route = await _context.Routes.FindAsync(model.Id);
+                if (route == null)
                 {
-                    Value = b.BusId.ToString(),
-                    Text = b.BusNumber.ToString()
-                }).ToListAsync(),
-                AvailableLoops = await _context.Loops.Select(l => new SelectListItem
-                {
-                    Text = l.Name,
-                    Value = l.Id.ToString()
-                }).ToListAsync()
-            };
+                    return NotFound();
+                }
+
+                route.RouteName = model.RouteName;
+                route.Order = model.Order;
+                route.BusId = model.SelectedBusId;
+                route.LoopId = model.SelectedLoopId;
+
+                _context.Update(route);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            // If ModelState is not valid, reload dropdown data and return the Edit view
+            model.AvailableBuses = GetBusesSelectList();
+            model.AvailableLoops = GetLoopsSelectList();
             return View(model);
         }
+
+
+        // DELETE: Route/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var route = await _context.Routes.FindAsync(id);
+            if (route == null)
+            {
+                return NotFound();
+            }
+
+            _context.Routes.Remove(route);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
 
         // Utility methods to get dropdown data
         private List<SelectListItem> GetBusesSelectList()
