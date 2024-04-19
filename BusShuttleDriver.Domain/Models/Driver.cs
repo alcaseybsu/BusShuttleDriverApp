@@ -13,5 +13,9 @@ namespace BusShuttleDriver.Domain.Models
         public string? Lastname { get; set; }
         public int AccountId { get; set; } // Foreign key for Account
 
+        // Link to the currently active RouteSession
+        public int? ActiveRouteSessionId { get; set; }
+        public RouteSession ActiveRouteSession { get; set; }
+
     }
 }

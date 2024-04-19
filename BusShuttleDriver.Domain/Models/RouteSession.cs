@@ -13,6 +13,7 @@ public class RouteSession
     public int LoopId { get; set; }
     public Loop Loop { get; set; }
     public DateTime StartTime { get; set; }
-    public string? DriverId { get; set; }  // Track which driver is logged in
+    public int DriverId { get; set; }  // Track which driver is logged in
+    public Driver Driver { get; set; }
     public bool IsActive { get; set; } = true;  // Indicates if route currently active
 }

@@ -98,7 +98,7 @@ namespace BusShuttleDriver.Controllers
             }
 
             // Handle errors if update failed
-            return View("Error"); // Adjust as needed
+            return View("Error");
         }
     }
 }

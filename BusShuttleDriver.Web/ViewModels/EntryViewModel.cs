@@ -1,27 +1,34 @@
-using System.Collections.Generic;
+using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using BusShuttleDriver.Domain.Models;
 
 namespace BusShuttleDriver.Web.ViewModels
 {
     public class EntryViewModel
     {
+        [Required]
         public int RouteSessionId { get; set; }
+
+        [Display(Name = "Stop")]
+        [Required(ErrorMessage = "Please select a stop.")]
         public int SelectedStopId { get; set; }
+
+        [Required(ErrorMessage = "Number of passengers boarded is required.")]
+        [Range(0, int.MaxValue, ErrorMessage = "Number must be non-negative.")]
         public int Boarded { get; set; }
+
+        [Required(ErrorMessage = "Number of passengers left behind is required.")]
+        [Range(0, int.MaxValue, ErrorMessage = "Number must be non-negative.")]
         public int LeftBehind { get; set; }
+
         public DateTime Timestamp { get; set; }
 
-        // Dropdown list of stops for the route
+        [Display(Name = "Select a Stop")]
         public SelectList AvailableStops { get; set; }
 
         public EntryViewModel()
         {
-            Timestamp = DateTime.UtcNow; // Init timestamp
+            Timestamp = DateTime.UtcNow; // Initialize timestamp
         }
     }
 }
-
-

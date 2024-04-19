@@ -275,7 +275,16 @@ namespace BusShuttleDriver.Web.Controllers
             {
                 try
                 {
-                    var driverId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get the current logged-in driver's ID
+                    var driverId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get current logged-in driver's ID
+                    if (driver == null) return NotFound("Driver not found.");
+
+                    // Check if driver has an active route session
+                    if (driver.ActiveRouteSessionId != null)
+                    {
+                        ModelState.AddModelError("", "You already have an active route session.");
+                        return View("Error", ModelState);
+                    }
+
                     var routeSession = new RouteSession
                     {
                         BusId = model.SelectedBusId,
@@ -286,6 +295,7 @@ namespace BusShuttleDriver.Web.Controllers
                     };
 
                     _context.RouteSessions.Add(routeSession);
+                    driver.ActiveRouteSessionId = routeSession.Id; // Set the active session ID                    
                     await _context.SaveChangesAsync(); // Asynchronously save changes to the database
 
                     // Redirect to Entry create view with session details
@@ -303,6 +313,24 @@ namespace BusShuttleDriver.Web.Controllers
             model.AvailableLoops = GetLoopsSelectList();
             return View("DriverIndex", model);
         }
+
+
+        public async Task<IActionResult> EndRoute(int routeSessionId)
+        {
+            var routeSession = await _context.RouteSessions.FindAsync(routeSessionId);
+            if (routeSession == null) return NotFound("Route session not found.");
+
+            var driver = await _context.Drivers.FindAsync(routeSession.DriverId);
+            if (driver != null)
+            {
+                driver.ActiveRouteSessionId = null; // Clear the active session
+            }
+
+            _context.RouteSessions.Remove(routeSession);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index", "Driver");
+        }
+
 
 
         [Authorize(Roles = "Driver")]

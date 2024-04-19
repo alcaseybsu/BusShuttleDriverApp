@@ -12,7 +12,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
     }
 
-    // Your DbSet properties for other entities
+    // Db Sets
     public DbSet<Bus> Buses { get; set; }
     public DbSet<Driver> Drivers { get; set; }
     public DbSet<Entry> Entries { get; set; }
@@ -20,6 +20,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<RouteModel> Routes { get; set; }
     public DbSet<Stop> Stops { get; set; }
     public DbSet<Account> Accounts { get; set; }
+    public DbSet<RouteSession> RouteSessions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,20 +36,20 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<IdentityRoleClaim<string>>(entity => entity.ToTable(name: "RoleClaims"));
         modelBuilder.Entity<IdentityUserToken<string>>(entity => entity.ToTable(name: "UserTokens"));
 
-        // Configure the Route to Bus relationship
+        // Route to Bus relationship
         modelBuilder.Entity<RouteModel>()
             .HasOne(r => r.Bus) // Route has one Bus
             .WithMany(b => b.Routes) // Bus has many Routes
             .HasForeignKey(r => r.BusId); // Foreign key in Route
 
-        // Configure the Route to Loop relationship
+        // Route to Loop relationship
         modelBuilder.Entity<RouteModel>()
             .HasOne(r => r.Loop) // Route has one Loop
             .WithMany(l => l.Routes) // Loop has many Routes
             .HasForeignKey(r => r.LoopId) // Foreign key in Route
             .OnDelete(DeleteBehavior.SetNull); // Set LoopId to null if Loop is deleted
 
-        // Configure the Stop to Route relationship
+        // Stop to Route relationship
         modelBuilder.Entity<Stop>()
             .HasOne(s => s.Route) // Stop has one Route
             .WithMany(r => r.Stops) // Route has many Stops
@@ -59,5 +60,30 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<Stop>()
             .HasIndex(s => new { s.RouteId, s.Order })
             .IsUnique();
+
+        modelBuilder.Entity<Driver>()
+            .HasOne(d => d.ActiveRouteSession)
+            .WithOne() // Driver has one ActiveRouteSession at a time
+            .HasForeignKey<Driver>(d => d.ActiveRouteSessionId) // Foreign key in Driver
+            .OnDelete(DeleteBehavior.SetNull); // ActiveRouteSessionId to null when RouteSession deleted
+
+
+        // RouteSession Configuration
+        modelBuilder.Entity<RouteSession>()
+            .HasOne(rs => rs.Driver) // RouteSession has one Driver
+            .WithMany() // Driver can have many RouteSessions
+            .HasForeignKey(rs => rs.DriverId) // Foreign key in RouteSession
+            .OnDelete(DeleteBehavior.SetNull); // Set DriverId null if Driver deleted
+
+        modelBuilder.Entity<RouteSession>()
+            .HasOne(rs => rs.Bus) // RouteSession has one Bus
+            .WithMany() // Bus can have many RouteSessions
+            .HasForeignKey(rs => rs.BusId); // Foreign key in RouteSession
+
+        modelBuilder.Entity<RouteSession>()
+            .HasOne(rs => rs.Loop) // RouteSession has one Loop
+            .WithMany() // Loop can have many RouteSessions
+            .HasForeignKey(rs => rs.LoopId); // Foreign key in RouteSession
     }
 }
+
