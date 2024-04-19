@@ -129,6 +129,76 @@ namespace BusShuttleDriver.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: Route/EditStops/5
+        public async Task<IActionResult> EditStops(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var route = await _context.Routes
+                                      .Include(r => r.Stops)
+                                      .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (route == null)
+            {
+                return NotFound();
+            }
+
+            var model = new EditStopsViewModel
+            {
+                RouteId = route.Id,
+                RouteName = route.RouteName,
+                Stops = route.Stops.OrderBy(s => s.Order).Select(s => new StopViewModel
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Order = s.Order
+                }).ToList()
+            };
+
+            return View(model);
+        }
+
+        // POST: Route/EditStops/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditStops(int id, EditStopsViewModel model)
+        {
+            if (id != model.RouteId)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                var route = await _context.Routes.Include(r => r.Stops).FirstOrDefaultAsync(r => r.Id == id);
+                if (route == null)
+                {
+                    return NotFound();
+
+                }
+
+                // Update stop orders based on the model
+                foreach (var stopModel in model.Stops)
+                {
+                    var stop = route.Stops.FirstOrDefault(s => s.Id == stopModel.Id);
+                    if (stop != null)
+                    {
+                        stop.Order = stopModel.Order;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
+            // If we got this far, something failed, redisplay form
+            return View(model);
+        }
+
+
 
         // Utility methods to get dropdown data
         private List<SelectListItem> GetBusesSelectList()

@@ -29,6 +29,7 @@
 </table>
 
 <a href="@Url.Action("Create")" class="btn btn-success">Add New Stop</a>
+<a href="@Url.Action("Index", "Driver")" class="btn btn-secondary">Back to Dashboard</a>
 
 <!-- Modal for editing -->
 <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
@@ -41,8 +42,7 @@
                 </button>
             </div>
             <div class="modal-body" id="editModalBody">
-
-
+                <!-- Modal body content will be loaded here from the server -->
             </div>
         </div>
     </div>

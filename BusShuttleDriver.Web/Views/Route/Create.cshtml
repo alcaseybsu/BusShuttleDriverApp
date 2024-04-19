@@ -29,13 +29,13 @@
 
     <div class="form-group">
         <label asp-for="SelectedStopIds" class="control-label">Stops</label>
-        <select asp-for="SelectedStopIds" asp-items="Model.AvailableStops" multiple class="form-control"
-            id="stopsList"></select>
+        <select asp-for="SelectedStopIds" asp-items="Model.AvailableStops" multiple class="form-control" id="stopsList">
+        </select>
         <span asp-validation-for="SelectedStopIds" class="text-danger"></span>
     </div>
 
-    <button type="button" id="moveUp">Move Up</button>
-    <button type="button" id="moveDown">Move Down</button>
+    <button type="button" id="moveUp" class="btn btn-secondary">Move Up</button>
+    <button type="button" id="moveDown" class="btn btn-secondary">Move Down</button>
 
     <button type="submit" class="btn btn-primary">Create</button>
 </form>
