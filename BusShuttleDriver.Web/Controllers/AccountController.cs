@@ -8,9 +8,9 @@ If the user is successfully created, the method checks if
 the user is the first one to sign up and assigns them the Manager role. 
 For subsequent users, it assigns them the Driver role and sets them as 
 inactive for manager validation. Finally, the method redirects 
-the user to the login page or dashboard (manager index page) based on their role. 
+the user to the login page or dashboard (manager dashboard page) based on their role. 
 If there are any errors during the process, the method adds them 
-to the ModelState and redisplay the form.
+to the ModelState and redisplays the form.
 */
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -85,7 +85,7 @@ namespace BusShuttleDriver.Web.Controllers
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
 
-                    return isFirstUser ? RedirectToAction("Index", "Manager") : RedirectToAction("Login", "Account");
+                    return isFirstUser ? RedirectToAction("Dashboard", "Manager") : RedirectToAction("Login", "Account");
                 }
 
                 foreach (var error in result.Errors)
