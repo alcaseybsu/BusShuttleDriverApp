@@ -1,14 +1,14 @@
-using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+using System.Threading.Tasks;
 using BusShuttleDriver.Data;
 using BusShuttleDriver.Domain.Models;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusShuttleDriver.Web.Controllers
 {
-    [Authorize(Roles = "Driver")]
+    [Authorize(Roles = "Manager")]
     public class DriverController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -53,7 +53,9 @@ namespace BusShuttleDriver.Web.Controllers
         // POST: Drivers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Firstname,Lastname,Username,Password")] Driver driver)
+        public async Task<IActionResult> Create(
+            [Bind("Firstname,Lastname,Username,Password")] Driver driver
+        )
         {
             if (ModelState.IsValid)
             {
@@ -83,9 +85,12 @@ namespace BusShuttleDriver.Web.Controllers
         // POST: Drivers/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Firstname,Lastname,Username,Password")] Driver driver)
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("Firstname,Lastname,Username,Password")] Driver driver
+        )
         {
-            if (id != driver.Id)
+            if (id != driver.DriverId)
             {
                 return NotFound();
             }
@@ -99,7 +104,7 @@ namespace BusShuttleDriver.Web.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DriverExists(driver.Id))
+                    if (!DriverExists(driver.DriverId))
                     {
                         return NotFound();
                     }
@@ -116,7 +121,7 @@ namespace BusShuttleDriver.Web.Controllers
         // Helper method to check if a Driver exists
         private bool DriverExists(int id)
         {
-            return _context.Drivers.Any(e => e.Id == id);
+            return _context.Drivers.Any(e => e.DriverId == id);
         }
     }
 }

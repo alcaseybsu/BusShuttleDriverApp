@@ -215,7 +215,6 @@ namespace BusShuttleDriver.Data.Migrations
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Stop", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<double>("Latitude")
@@ -226,6 +225,7 @@ namespace BusShuttleDriver.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Order")
@@ -417,7 +417,7 @@ namespace BusShuttleDriver.Data.Migrations
                     b.HasOne("BusShuttleDriver.Domain.Models.Bus", "Bus")
                         .WithMany("Routes")
                         .HasForeignKey("BusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
                     b.HasOne("BusShuttleDriver.Domain.Models.Loop", "Loop")
@@ -432,6 +432,12 @@ namespace BusShuttleDriver.Data.Migrations
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Stop", b =>
                 {
+                    b.HasOne("BusShuttleDriver.Domain.Models.Loop", null)
+                        .WithMany("Stops")
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BusShuttleDriver.Domain.Models.RouteModel", "Route")
                         .WithMany("Stops")
                         .HasForeignKey("RouteId")
@@ -526,6 +532,8 @@ namespace BusShuttleDriver.Data.Migrations
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Loop", b =>
                 {
                     b.Navigation("Routes");
+
+                    b.Navigation("Stops");
                 });
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.RouteModel", b =>

@@ -15,7 +15,7 @@ namespace BusShuttleDriver.Domain.Models
 
         // Link to the currently active RouteSession
         public int? ActiveRouteSessionId { get; set; }
-        public RouteSession ActiveRouteSession { get; set; }
+        public RouteSession? ActiveRouteSession { get; set; }
 
     }
 }

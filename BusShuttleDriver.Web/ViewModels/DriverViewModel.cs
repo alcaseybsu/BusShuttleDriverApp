@@ -4,7 +4,7 @@ namespace BusShuttleDriver.Web.ViewModels
 {
     public class DriverViewModel
     {
-        public string? Id { get; set; }
+        public string? Id { get; set; } // Primary key
         [Display(Name = "First Name")]
         public string? Firstname { get; set; }
         [Display(Name = "Last Name")]

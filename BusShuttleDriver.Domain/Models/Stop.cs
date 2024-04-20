@@ -24,9 +24,4 @@ namespace BusShuttleDriver.Domain.Models
 
         public int Order { get; set; } // Order of the stop in the route
     }
-
-
-
-
-
 }

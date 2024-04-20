@@ -1,16 +1,17 @@
-using Microsoft.AspNetCore.Mvc;
-using BusShuttleDriver.Data;
-using BusShuttleDriver.Domain.Models;
-using BusShuttleDriver.Web.ViewModels;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using BusShuttleDriver.Data;
+using BusShuttleDriver.Domain.Models;
+using BusShuttleDriver.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace BusShuttleDriver.Web.Controllers
 {
+    [Authorize(Roles = "Driver")]
     public class EntryController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,14 +24,14 @@ namespace BusShuttleDriver.Web.Controllers
         // GET: Create Entry View for Drivers - Shows dropdown for current/first stop
         public async Task<IActionResult> Create(int routeSessionId)
         {
-            var routeSession = await _context.RouteSessions
-                .Include(rs => rs.Loop)
-                .ThenInclude(l => l.Stops) // Assuming Loop has Stops navigation property
+            var routeSession = await _context
+                .RouteSessions.Include(rs => rs.Loop)
+                .ThenInclude(l => l.Stops)
                 .FirstOrDefaultAsync(rs => rs.Id == routeSessionId);
 
-            if (routeSession == null || routeSession.Loop == null)
+            if (routeSession?.Loop == null || routeSession.Loop?.Stops == null)
             {
-                return NotFound("Route session or loop not found.");
+                return NotFound("Route session, loop, or stops not found.");
             }
 
             var model = new EntryViewModel
@@ -56,12 +57,15 @@ namespace BusShuttleDriver.Web.Controllers
                         Id = model.SelectedStopId,
                         Boarded = model.Boarded,
                         LeftBehind = model.LeftBehind,
-                        Timestamp = DateTime.UtcNow  // Optional: record time of entry
+                        Timestamp = DateTime.UtcNow // Optional: record time of entry
                     };
                     _context.Entries.Add(entry);
                     await _context.SaveChangesAsync();
 
-                    return RedirectToAction(nameof(Create), new { routeSessionId = model.RouteSessionId });
+                    return RedirectToAction(
+                        nameof(Create),
+                        new { routeSessionId = model.RouteSessionId }
+                    );
                 }
                 catch (Exception ex)
                 {
@@ -70,12 +74,17 @@ namespace BusShuttleDriver.Web.Controllers
             }
 
             // Reload stops if there's an error
-            var routeSession = await _context.RouteSessions
-                .Include(rs => rs.Loop)
+            var routeSession = await _context
+                .RouteSessions.Include(rs => rs.Loop)
                 .FirstOrDefaultAsync(rs => rs.Id == model.RouteSessionId);
             if (routeSession?.Loop != null)
             {
-                model.AvailableStops = new SelectList(routeSession.Loop.Stops, "Id", "Name", model.SelectedStopId);
+                model.AvailableStops = new SelectList(
+                    routeSession.Loop.Stops,
+                    "Id",
+                    "Name",
+                    model.SelectedStopId
+                );
             }
             return View(model);
         }
@@ -89,7 +98,7 @@ namespace BusShuttleDriver.Web.Controllers
             if (routeSession != null)
             {
                 routeSession.IsActive = false; // Mark the session as inactive
-                routeSession.EndTime = DateTime.Now; // Optionally record the end time
+                // routeSession.EndTime = DateTime.Now; // Optionally record the end time
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index", "Driver"); // Redirect to driver's main page
             }
@@ -151,4 +160,3 @@ namespace BusShuttleDriver.Web.Controllers
         }
     }
 }
-

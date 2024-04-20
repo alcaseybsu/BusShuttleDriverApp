@@ -1,14 +1,15 @@
-using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+using System.Threading.Tasks;
 using BusShuttleDriver.Data;
 using BusShuttleDriver.Domain.Models;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-using BusShuttleDriver.Web.ViewModels;
 using BusShuttleDriver.Web.Models;
+using BusShuttleDriver.Web.ViewModels;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusShuttleDriver.Web.Controllers
 {
+    [Authorize(Roles = "Manager")]
     public class LoopController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -21,12 +22,8 @@ namespace BusShuttleDriver.Web.Controllers
         // GET: Loops
         public async Task<IActionResult> Index()
         {
-            var loopsViewModel = await _context.Loops
-                .Select(loop => new LoopViewModel
-                {
-                    Id = loop.Id,
-                    Name = loop.Name
-                })
+            var loopsViewModel = await _context
+                .Loops.Select(loop => new LoopViewModel { Id = loop.Id, Name = loop.Name })
                 .ToListAsync();
 
             return View(loopsViewModel);
@@ -80,11 +77,7 @@ namespace BusShuttleDriver.Web.Controllers
                 return NotFound();
             }
 
-            var viewModel = new LoopViewModel
-            {
-                Id = loop.Id,
-                Name = loop.Name
-            };
+            var viewModel = new LoopViewModel { Id = loop.Id, Name = loop.Name };
 
             return View(viewModel);
         }
@@ -130,8 +123,8 @@ namespace BusShuttleDriver.Web.Controllers
                 return NotFound();
             }
 
-            var loop = await _context.Loops
-                .Include(l => l.Routes)
+            var loop = await _context
+                .Loops.Include(l => l.Routes)
                 .FirstOrDefaultAsync(l => l.Id == id);
 
             if (loop == null)
@@ -141,14 +134,19 @@ namespace BusShuttleDriver.Web.Controllers
 
             if (loop.Routes.Any())
             {
-                // Handle the case where routes still reference this loop                
-                return View("Error", new ErrorViewModel { Message = "Cannot delete loop because it has associated routes." });
+                // Handle the case where routes still reference this loop
+                return View(
+                    "Error",
+                    new ErrorViewModel
+                    {
+                        Message = "Cannot delete loop because it has associated routes."
+                    }
+                );
             }
 
             _context.Loops.Remove(loop);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
     }
 }

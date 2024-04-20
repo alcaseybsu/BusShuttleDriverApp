@@ -1,14 +1,16 @@
-using Microsoft.AspNetCore.Mvc;
-using BusShuttleDriver.Data;
-using BusShuttleDriver.Domain.Models;
-using Microsoft.EntityFrameworkCore;
-using BusShuttleDriver.Web.ViewModels;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
+using BusShuttleDriver.Data;
+using BusShuttleDriver.Domain.Models;
+using BusShuttleDriver.Web.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusShuttleDriver.Web.Controllers
 {
+    [Authorize(Roles = "Manager")]
     public class StopController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -21,14 +23,15 @@ namespace BusShuttleDriver.Web.Controllers
         // GET: Stops
         public async Task<IActionResult> Index()
         {
-            var stops = await _context.Stops
-                .Select(s => new StopViewModel
+            var stops = await _context
+                .Stops.Select(s => new StopViewModel
                 {
                     Id = s.Id,
                     Name = s.Name,
                     Latitude = s.Latitude,
                     Longitude = s.Longitude
-                }).ToListAsync();
+                })
+                .ToListAsync();
 
             return View(stops);
         }
@@ -49,7 +52,6 @@ namespace BusShuttleDriver.Web.Controllers
                 if (viewModel == null)
                 {
                     throw new ArgumentNullException(nameof(viewModel));
-
                 }
 
                 if (viewModel.Name == null)

@@ -40,7 +40,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<RouteModel>()
             .HasOne(r => r.Bus) // Route has one Bus
             .WithMany(b => b.Routes) // Bus has many Routes
-            .HasForeignKey(r => r.BusId); // Foreign key in Route
+            .HasForeignKey(r => r.BusId) // Foreign key in Route
+            .OnDelete(DeleteBehavior.SetNull); // Set BusId to null if Bus is deleted
 
         // Route to Loop relationship
         modelBuilder.Entity<RouteModel>()
@@ -56,6 +57,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(s => s.RouteId) // Foreign key in Stop pointing to Route
             .OnDelete(DeleteBehavior.Restrict); // Don't delete stops if Route is deleted
 
+        modelBuilder.Entity<Stop>()
+            .Property(s => s.Name)
+            .IsRequired()
+            .HasMaxLength(100); // Stop name max length
+
         // Ensure unique order for Stops within the same Route
         modelBuilder.Entity<Stop>()
             .HasIndex(s => new { s.RouteId, s.Order })
@@ -64,7 +70,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<Driver>()
             .HasOne(d => d.ActiveRouteSession)
             .WithOne() // Driver has one ActiveRouteSession at a time
-            .HasForeignKey<Driver>(d => d.ActiveRouteSessionId) // Foreign key in Driver
+            .HasForeignKey<Driver>(d => d.ActiveRouteSessionId) // Foreign key in Driver            
             .OnDelete(DeleteBehavior.SetNull); // ActiveRouteSessionId to null when RouteSession deleted
 
 
@@ -84,6 +90,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(rs => rs.Loop) // RouteSession has one Loop
             .WithMany() // Loop can have many RouteSessions
             .HasForeignKey(rs => rs.LoopId); // Foreign key in RouteSession
+
+        modelBuilder.Entity<Loop>()
+            .HasMany(l => l.Stops) // Define the collection of Stops in Loop
+            .WithOne() // Stop doesn't need to back-reference to Loop
+            .HasForeignKey(s => s.Id); // Stop model has a LoopId foreign key
+
     }
 }
 

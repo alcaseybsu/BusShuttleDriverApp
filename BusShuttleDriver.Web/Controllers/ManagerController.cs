@@ -1,13 +1,12 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
-using BusShuttleDriver.Web.ViewModels;
-using BusShuttleDriver.Domain.Models;
 using BusShuttleDriver.Data;
-
+using BusShuttleDriver.Domain.Models;
+using BusShuttleDriver.Web.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusShuttleDriver.Controllers
 {
@@ -15,13 +14,53 @@ namespace BusShuttleDriver.Controllers
     public class ManagerController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationDbContext _context;
 
-        public ManagerController(UserManager<ApplicationUser> userManager)
+        public ManagerController(
+            UserManager<ApplicationUser> userManager,
+            ApplicationDbContext context
+        )
         {
             _userManager = userManager;
+            _context = context;
+        }
+
+        public async Task<IActionResult> Dashboard()
+        {
+            var model = new ManagerDashboardViewModel
+            {
+                TotalBuses = await _context.Buses.CountAsync(),
+                TotalRoutes = await _context.Routes.CountAsync(),
+                TotalLoops = await _context.Loops.CountAsync(),
+                TotalStops = await _context.Stops.CountAsync(),
+                TotalEntries = await _context.Entries.CountAsync(),
+                // Add method to calculate TotalReports if needed
+                TotalReports = 0 // Placeholder
+            };
+
+            return View("Dashboard", model); // Make sure to create Dashboard.cshtml under Views/Manager
+        }
+
+        public async Task<IActionResult> ActivateDrivers()
+        {
+            var drivers = await _userManager
+                .Users.Where(user => _userManager.IsInRoleAsync(user, "Driver").Result)
+                .Select(user => new DriverViewModel
+                {
+                    Id = user.Id,
+                    Firstname = user.Firstname,
+                    Lastname = user.Lastname,
+                    Email = user.Email,
+                    IsActive = user.IsActive,
+                    Role = "Driver"
+                })
+                .ToListAsync();
+
+            return View("ActivateDrivers", drivers); // Make sure to create ActivateDrivers.cshtml under Views/Manager
         }
 
         [HttpGet]
+        [Authorize(Roles = "Manager")]
         public IActionResult CreateDriver()
         {
             return View();
@@ -67,15 +106,17 @@ namespace BusShuttleDriver.Controllers
                 var roles = await _userManager.GetRolesAsync(user);
                 if (roles.Contains(driverRoleName))
                 {
-                    driversViewModels.Add(new DriverViewModel
-                    {
-                        Id = user.Id,
-                        Firstname = user.Firstname,
-                        Lastname = user.Lastname,
-                        Email = user.UserName,
-                        IsActive = user.IsActive,
-                        Role = string.Join(", ", roles) // In multiple roles, join them. Otherwise, display one.
-                    });
+                    driversViewModels.Add(
+                        new DriverViewModel
+                        {
+                            Id = user.Id,
+                            Firstname = user.Firstname,
+                            Lastname = user.Lastname,
+                            Email = user.UserName,
+                            IsActive = user.IsActive,
+                            Role = string.Join(", ", roles) // In multiple roles, join them. Else, display one.
+                        }
+                    );
                 }
             }
 
@@ -102,4 +143,3 @@ namespace BusShuttleDriver.Controllers
         }
     }
 }
-

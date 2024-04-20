@@ -1,17 +1,18 @@
-using Microsoft.AspNetCore.Mvc;
-using BusShuttleDriver.Data;
-using BusShuttleDriver.Domain.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-using BusShuttleDriver.Web.ViewModels;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using BusShuttleDriver.Data;
+using BusShuttleDriver.Domain.Models;
+using BusShuttleDriver.Web.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusShuttleDriver.Web.Controllers
 {
+    [Authorize(Roles = "Manager")]
     public class RouteController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -21,11 +22,11 @@ namespace BusShuttleDriver.Web.Controllers
             _context = context;
         }
 
-        // GET: Routes        
+        // GET: Routes
         public async Task<IActionResult> Index()
         {
-            var routes = await _context.Routes
-                .Include(r => r.Loop)
+            var routes = await _context
+                .Routes.Include(r => r.Loop)
                 .Include(r => r.Bus)
                 .Select(r => new RouteViewModel
                 {
@@ -35,14 +36,18 @@ namespace BusShuttleDriver.Web.Controllers
                     LoopName = r.Loop.Name,
                     Order = r.Order,
                     StopsCount = r.Stops.Count,
-                    Stops = r.Stops.OrderBy(s => s.Order).Select(s => new StopViewModel
-                    {
-                        Id = s.Id,
-                        Name = s.Name,
-                        Latitude = s.Latitude,
-                        Longitude = s.Longitude
-                    }).ToList(),
-                }).ToListAsync();
+                    Stops = r
+                        .Stops.OrderBy(s => s.Order)
+                        .Select(s => new StopViewModel
+                        {
+                            Id = s.Id,
+                            Name = s.Name,
+                            Latitude = s.Latitude,
+                            Longitude = s.Longitude
+                        })
+                        .ToList(),
+                })
+                .ToListAsync();
 
             return View(routes);
         }
@@ -58,7 +63,6 @@ namespace BusShuttleDriver.Web.Controllers
             };
             return View(model);
         }
-
 
         // POST: Routes/Create
         [HttpPost]
@@ -76,22 +80,24 @@ namespace BusShuttleDriver.Web.Controllers
 
                 // Add the route first to generate its ID
                 _context.Routes.Add(route);
-                await _context.SaveChangesAsync();  // Save changes to generate route.Id
+                await _context.SaveChangesAsync(); // Save changes to generate route.Id
 
                 // Parse OrderedStopIds and maintain the correct order
-                var orderedStopIds = model.OrderedStopIds.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                        .Select(int.Parse).ToList();
+                var orderedStopIds = model
+                    .OrderedStopIds.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(int.Parse)
+                    .ToList();
 
                 // Fetch stops in the order they are supposed to be set
-                var stopEntities = _context.Stops
-                                        .Where(s => orderedStopIds.Contains(s.Id))
-                                        .ToList()
-                                        .OrderBy(s => orderedStopIds.IndexOf(s.Id));  // Order by the sequence in orderedStopIds
+                var stopEntities = _context
+                    .Stops.Where(s => orderedStopIds.Contains(s.Id))
+                    .ToList()
+                    .OrderBy(s => orderedStopIds.IndexOf(s.Id)); // Order by the sequence in orderedStopIds
 
                 foreach (var stop in stopEntities)
                 {
-                    stop.RouteId = route.Id;  // Set RouteId to the newly created route's ID
-                    route.Stops.Add(stop);    // Add stop to the route's Stops collection
+                    stop.RouteId = route.Id; // Set RouteId to the newly created route's ID
+                    route.Stops.Add(stop); // Add stop to the route's Stops collection
                 }
 
                 // Save changes again to update stops with the new RouteId
@@ -105,8 +111,6 @@ namespace BusShuttleDriver.Web.Controllers
             model.AvailableStops = GetStopsSelectList();
             return View(model);
         }
-
-
 
         // POST: Routes/Edit/5
         [HttpPost]
@@ -127,9 +131,13 @@ namespace BusShuttleDriver.Web.Controllers
 
                 if (model.OrderedStopIds != null)
                 {
-                    var orderedStopIds = model.OrderedStopIds.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                            .Select(int.Parse).ToList();
-                    var stopEntities = _context.Stops.Where(s => orderedStopIds.Contains(s.Id)).ToList();
+                    var orderedStopIds = model
+                        .OrderedStopIds.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(int.Parse)
+                        .ToList();
+                    var stopEntities = _context
+                        .Stops.Where(s => orderedStopIds.Contains(s.Id))
+                        .ToList();
 
                     foreach (var stopId in orderedStopIds)
                     {
@@ -153,7 +161,6 @@ namespace BusShuttleDriver.Web.Controllers
             model.AvailableStops = GetStopsSelectList();
             return View(model);
         }
-
 
         // DELETE: Route/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -185,9 +192,9 @@ namespace BusShuttleDriver.Web.Controllers
                 return NotFound();
             }
 
-            var route = await _context.Routes
-                                      .Include(r => r.Stops)
-                                      .FirstOrDefaultAsync(m => m.Id == id);
+            var route = await _context
+                .Routes.Include(r => r.Stops)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
             if (route == null)
             {
@@ -198,12 +205,15 @@ namespace BusShuttleDriver.Web.Controllers
             {
                 RouteId = route.Id,
                 RouteName = route.RouteName,
-                Stops = route.Stops.OrderBy(s => s.Order).Select(s => new StopViewModel
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    Order = s.Order
-                }).ToList()
+                Stops = route
+                    .Stops.OrderBy(s => s.Order)
+                    .Select(s => new StopViewModel
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        Order = s.Order
+                    })
+                    .ToList()
             };
 
             return View(model);
@@ -221,11 +231,12 @@ namespace BusShuttleDriver.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                var route = await _context.Routes.Include(r => r.Stops).FirstOrDefaultAsync(r => r.Id == id);
+                var route = await _context
+                    .Routes.Include(r => r.Stops)
+                    .FirstOrDefaultAsync(r => r.Id == id);
                 if (route == null)
                 {
                     return NotFound();
-
                 }
 
                 // Update stop orders based on the model
@@ -253,16 +264,16 @@ namespace BusShuttleDriver.Web.Controllers
                 return NotFound();
             }
 
-            var route = await _context.Routes
-                                      .Include(r => r.Stops)
-                                      .FirstOrDefaultAsync(r => r.Id == id);
+            var route = await _context
+                .Routes.Include(r => r.Stops)
+                .FirstOrDefaultAsync(r => r.Id == id);
 
             if (route == null)
             {
                 return NotFound();
             }
 
-            return View(route);  // Pass route to the view
+            return View(route); // Pass route to the view
         }
 
         // POST: Entry/Create
@@ -276,7 +287,12 @@ namespace BusShuttleDriver.Web.Controllers
                 try
                 {
                     var driverId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get current logged-in driver's ID
-                    if (driver == null) return NotFound("Driver not found.");
+                    if (driverId == null)
+                        return NotFound("Driver not found.");
+
+                    var driver = await _context.Drivers.FindAsync(int.Parse(driverId)); // Retrieve the driver entity from the database
+                    if (driver == null)
+                        return NotFound("Driver not found.");
 
                     // Check if driver has an active route session
                     if (driver.ActiveRouteSessionId != null)
@@ -290,16 +306,20 @@ namespace BusShuttleDriver.Web.Controllers
                         BusId = model.SelectedBusId,
                         LoopId = model.SelectedLoopId,
                         StartTime = DateTime.Now,
-                        DriverId = driverId,
+                        DriverId = driver.DriverId,
                         IsActive = true
                     };
 
                     _context.RouteSessions.Add(routeSession);
-                    driver.ActiveRouteSessionId = routeSession.Id; // Set the active session ID                    
+                    driver.ActiveRouteSessionId = routeSession.Id; // Set the active session ID
                     await _context.SaveChangesAsync(); // Asynchronously save changes to the database
 
                     // Redirect to Entry create view with session details
-                    return RedirectToAction("Create", "Entry", new { routeSessionId = routeSession.Id });
+                    return RedirectToAction(
+                        "Create",
+                        "Entry",
+                        new { routeSessionId = routeSession.Id }
+                    );
                 }
                 catch (Exception ex)
                 {
@@ -308,17 +328,17 @@ namespace BusShuttleDriver.Web.Controllers
                 }
             }
 
-            // Repopulate dropdowns if validation or save error 
+            // Repopulate dropdowns if validation or save error
             model.AvailableBuses = GetBusesSelectList();
             model.AvailableLoops = GetLoopsSelectList();
             return View("DriverIndex", model);
         }
 
-
         public async Task<IActionResult> EndRoute(int routeSessionId)
         {
             var routeSession = await _context.RouteSessions.FindAsync(routeSessionId);
-            if (routeSession == null) return NotFound("Route session not found.");
+            if (routeSession == null)
+                return NotFound("Route session not found.");
 
             var driver = await _context.Drivers.FindAsync(routeSession.DriverId);
             if (driver != null)
@@ -330,8 +350,6 @@ namespace BusShuttleDriver.Web.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("Index", "Driver");
         }
-
-
 
         [Authorize(Roles = "Driver")]
         public IActionResult DriverIndex()
@@ -346,29 +364,27 @@ namespace BusShuttleDriver.Web.Controllers
 
         private List<SelectListItem> GetBusesSelectList()
         {
-            return _context.Buses.Select(b => new SelectListItem
-            {
-                Value = b.BusId.ToString(),
-                Text = b.BusNumber.ToString()
-            }).ToList();
+            return _context
+                .Buses.Select(b => new SelectListItem
+                {
+                    Value = b.BusId.ToString(),
+                    Text = b.BusNumber.ToString()
+                })
+                .ToList();
         }
 
         private List<SelectListItem> GetLoopsSelectList()
         {
-            return _context.Loops.Select(l => new SelectListItem
-            {
-                Value = l.Id.ToString(),
-                Text = l.Name
-            }).ToList();
+            return _context
+                .Loops.Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name })
+                .ToList();
         }
 
         private List<SelectListItem> GetStopsSelectList()
         {
-            return _context.Stops.Select(s => new SelectListItem
-            {
-                Value = s.Id.ToString(),
-                Text = s.Name
-            }).ToList();
+            return _context
+                .Stops.Select(s => new SelectListItem { Value = s.Id.ToString(), Text = s.Name })
+                .ToList();
         }
     }
 }

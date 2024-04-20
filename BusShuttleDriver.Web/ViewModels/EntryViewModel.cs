@@ -24,7 +24,7 @@ namespace BusShuttleDriver.Web.ViewModels
         public DateTime Timestamp { get; set; }
 
         [Display(Name = "Select a Stop")]
-        public SelectList AvailableStops { get; set; }
+        public SelectList AvailableStops { get; set; } = new SelectList(Array.Empty<object>());
 
         public EntryViewModel()
         {

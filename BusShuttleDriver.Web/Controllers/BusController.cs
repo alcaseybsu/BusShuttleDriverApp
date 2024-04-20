@@ -1,13 +1,15 @@
-using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+using System.Threading.Tasks;
 using BusShuttleDriver.Data;
 using BusShuttleDriver.Domain.Models;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 using BusShuttleDriver.Web.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusShuttleDriver.Web.Controllers
 {
+    [Authorize(Roles = "Manager")]
     public class BusController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -33,10 +35,9 @@ namespace BusShuttleDriver.Web.Controllers
             return View(model);
         }
 
-
-
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> Create(BusCreateViewModel model)
         {
             if (ModelState.IsValid)
@@ -49,7 +50,6 @@ namespace BusShuttleDriver.Web.Controllers
             model.ExistingBuses = _context.Buses.ToList(); // Reload existing buses to display
             return View(model);
         }
-
 
         // GET: Buses/Edit/id
         public async Task<IActionResult> Edit(int? id)
@@ -104,7 +104,6 @@ namespace BusShuttleDriver.Web.Controllers
         {
             return _context.Buses.Any(e => e.BusId == id);
         }
-
 
         // GET: Buses/Delete/id
         public async Task<IActionResult> Delete(int? id)
