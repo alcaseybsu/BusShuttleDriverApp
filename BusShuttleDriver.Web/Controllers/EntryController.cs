@@ -21,23 +21,47 @@ namespace BusShuttleDriver.Web.Controllers
             _context = context;
         }
 
+        // GET: Entry/Index
+        public async Task<IActionResult> Index()
+        {
+            var entries = await _context
+                .Entries.Select(e => new EntryViewModel
+                {
+                    LoopName = e.LoopName,
+                    Timestamp = e.Timestamp,
+                    StopName = e.StopName,
+                    Boarded = e.Boarded,
+                    LeftBehind = e.LeftBehind
+                })
+                .ToListAsync();
+
+            return View(entries);
+        }
+
         // GET: Create Entry View for Drivers - Shows dropdown for current/first stop
         public async Task<IActionResult> Create(int routeSessionId)
         {
             var routeSession = await _context
-                .RouteSessions.Include(rs => rs.Loop)
-                .ThenInclude(l => l.Stops)
+                .RouteSessions.Include(rs => rs.Route)
+                .ThenInclude(r => r.Stops)
+                .Include(rs => rs.Route.Loop)
                 .FirstOrDefaultAsync(rs => rs.Id == routeSessionId);
 
-            if (routeSession?.Loop == null || routeSession.Loop?.Stops == null)
+            if (
+                routeSession == null
+                || routeSession.Route == null
+                || routeSession.Route.Stops == null
+            )
             {
-                return NotFound("Route session, loop, or stops not found.");
+                return NotFound("Route session or stops not found.");
             }
+
+            var stops = routeSession.Route.Stops.OrderBy(s => s.Order); // Assuming Order is defined in Stops
 
             var model = new EntryViewModel
             {
                 RouteSessionId = routeSessionId,
-                AvailableStops = new SelectList(routeSession.Loop.Stops, "Id", "Name")
+                AvailableStops = new SelectList(stops, "Id", "Name")
             };
 
             return View(model);
@@ -54,10 +78,10 @@ namespace BusShuttleDriver.Web.Controllers
                 {
                     var entry = new Entry
                     {
-                        Id = model.SelectedStopId,
+                        StopName = model.StopName,
                         Boarded = model.Boarded,
                         LeftBehind = model.LeftBehind,
-                        Timestamp = DateTime.UtcNow // Optional: record time of entry
+                        Timestamp = DateTime.UtcNow
                     };
                     _context.Entries.Add(entry);
                     await _context.SaveChangesAsync();
@@ -75,17 +99,16 @@ namespace BusShuttleDriver.Web.Controllers
 
             // Reload stops if there's an error
             var routeSession = await _context
-                .RouteSessions.Include(rs => rs.Loop)
+                .RouteSessions.Include(rs => rs.Route)
+                .ThenInclude(r => r.Stops)
                 .FirstOrDefaultAsync(rs => rs.Id == model.RouteSessionId);
-            if (routeSession?.Loop != null)
+
+            if (routeSession?.Route != null)
             {
-                model.AvailableStops = new SelectList(
-                    routeSession.Loop.Stops,
-                    "Id",
-                    "Name",
-                    model.SelectedStopId
-                );
+                var stops = routeSession.Route.Stops.OrderBy(s => s.Order); // Assuming Order is defined in Stops
+                model.AvailableStops = new SelectList(stops, "Id", "Name", model.SelectedStopId);
             }
+
             return View(model);
         }
 

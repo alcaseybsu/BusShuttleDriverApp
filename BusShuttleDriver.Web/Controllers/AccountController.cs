@@ -102,7 +102,7 @@ namespace BusShuttleDriver.Web.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Login(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl ?? "/";
             return View();
@@ -123,6 +123,28 @@ namespace BusShuttleDriver.Web.Controllers
                     return View(model);
                 }
 
+                var user = await _userManager.FindByNameAsync(model.Username);
+                if (user == null || string.IsNullOrEmpty(model.Password))
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Invalid login attempt. Please check your credentials."
+                    );
+                    return View(model);
+                }
+
+                if (!user.IsActive)
+                {
+                    if (await _userManager.IsInRoleAsync(user, "Driver"))
+                    {
+                        ModelState.AddModelError(
+                            string.Empty,
+                            "Your account is not active. Please contact your manager."
+                        );
+                        return View(model);
+                    }
+                }
+
                 var result = await _signInManager.PasswordSignInAsync(
                     model.Username,
                     model.Password,
@@ -132,7 +154,6 @@ namespace BusShuttleDriver.Web.Controllers
 
                 if (result.Succeeded)
                 {
-                    var user = await _userManager.FindByNameAsync(model.Username);
                     if (user != null)
                     {
                         if (await _userManager.IsInRoleAsync(user, "Manager"))
@@ -155,7 +176,7 @@ namespace BusShuttleDriver.Web.Controllers
         public async Task<IActionResult> LogOut()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Login");
+            return RedirectToAction("Login", "Account");
         }
     }
 }

@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using BusShuttleDriver.Domain.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BusShuttleDriver.Web.ViewModels
 {
@@ -9,34 +9,29 @@ namespace BusShuttleDriver.Web.ViewModels
     {
         public int Id { get; set; } // Primary key
 
-        [Required]
+        [Required(ErrorMessage = "The route name is required.")]
         [Display(Name = "Route Name")]
         public string? RouteName { get; set; }
 
-        public int Order { get; set; }
-
-        [Required]
-        [Display(Name = "Bus")]
-        public int SelectedBusId { get; set; }
-
-        [Required]
+        [Required(ErrorMessage = "Selecting a loop is required.")]
         [Display(Name = "Loop")]
-        public int SelectedLoopId { get; set; }
+        public int? SelectedLoopId { get; set; }
 
-        public List<SelectListItem> AvailableBuses { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> AvailableLoops { get; set; } = new List<SelectListItem>();
-        public List<SelectListItem> AvailableStops { get; set; } = new List<SelectListItem>();
 
-        public List<int> SelectedStopIds { get; set; }
-        public string OrderedStopIds { get; set; }  // Init as string
+        [Display(Name = "Stops")]
+        public List<int> SelectedStopIds { get; set; } = new List<int>();
+
+        public List<SelectListItem> AvailableStops { get; set; } = new List<SelectListItem>(); // Display stops as options
+
+        public string OrderedStopIds { get; set; } = ""; // Stores ordered stop IDs as a comma-separated string
 
         public RouteCreateModel()
         {
-            AvailableBuses = new List<SelectListItem>();
             AvailableLoops = new List<SelectListItem>();
             AvailableStops = new List<SelectListItem>();
             SelectedStopIds = new List<int>();
-            OrderedStopIds = "";  // Init as empty string
+            OrderedStopIds = "";
         }
     }
 }

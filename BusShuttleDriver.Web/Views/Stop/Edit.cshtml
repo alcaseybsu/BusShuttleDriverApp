@@ -4,7 +4,7 @@
 
 <form asp-action="Edit" method="post">
     @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="Id" />  <!-- Important: include the stop's ID to identify which stop is being edited -->
+    <input type="hidden" asp-for="Id" />  <!-- Identify which stop is being edited -->
     <div class="form-group">
         <label asp-for="Name" class="control-label">Stop Name</label>
         <input asp-for="Name" class="form-control" />

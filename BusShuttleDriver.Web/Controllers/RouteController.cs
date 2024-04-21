@@ -12,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BusShuttleDriver.Web.Controllers
 {
-    [Authorize(Roles = "Manager")]
     public class RouteController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -22,19 +21,18 @@ namespace BusShuttleDriver.Web.Controllers
             _context = context;
         }
 
-        // GET: Routes
+        // GET: Route/Index
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> Index()
         {
             var routes = await _context
                 .Routes.Include(r => r.Loop)
-                .Include(r => r.Bus)
+                .Include(r => r.Stops)
                 .Select(r => new RouteViewModel
                 {
                     Id = r.Id,
                     RouteName = r.RouteName,
-                    BusNumber = r.Bus.BusNumber.ToString(),
                     LoopName = r.Loop.Name,
-                    Order = r.Order,
                     StopsCount = r.Stops.Count,
                     Stops = r
                         .Stops.OrderBy(s => s.Order)
@@ -52,21 +50,23 @@ namespace BusShuttleDriver.Web.Controllers
             return View(routes);
         }
 
-        // GET: Routes/Create
+        // GET: Route/Create
+        [Authorize(Roles = "Manager")]
+        [HttpGet]
         public IActionResult Create()
         {
             var model = new RouteCreateModel
             {
-                AvailableBuses = GetBusesSelectList(),
                 AvailableLoops = GetLoopsSelectList(),
                 AvailableStops = GetStopsSelectList()
             };
             return View(model);
         }
 
-        // POST: Routes/Create
+        // POST: Route/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> Create(RouteCreateModel model)
         {
             if (ModelState.IsValid)
@@ -74,136 +74,57 @@ namespace BusShuttleDriver.Web.Controllers
                 var route = new RouteModel
                 {
                     RouteName = model.RouteName,
-                    BusId = model.SelectedBusId,
                     LoopId = model.SelectedLoopId
                 };
 
-                // Add the route first to generate its ID
                 _context.Routes.Add(route);
-                await _context.SaveChangesAsync(); // Save changes to generate route.Id
+                await _context.SaveChangesAsync(); // Save to generate route.Id
 
-                // Parse OrderedStopIds and maintain the correct order
-                var orderedStopIds = model
-                    .OrderedStopIds.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(int.Parse)
-                    .ToList();
+                // Assuming UpdateStopOrder now correctly expects a List<int> for the first argument
+                await UpdateStopOrder(model.SelectedStopIds, route.Id); // Handle Stops
 
-                // Fetch stops in the order they are supposed to be set
-                var stopEntities = _context
-                    .Stops.Where(s => orderedStopIds.Contains(s.Id))
-                    .ToList()
-                    .OrderBy(s => orderedStopIds.IndexOf(s.Id)); // Order by the sequence in orderedStopIds
-
-                foreach (var stop in stopEntities)
-                {
-                    stop.RouteId = route.Id; // Set RouteId to the newly created route's ID
-                    route.Stops.Add(stop); // Add stop to the route's Stops collection
-                }
-
-                // Save changes again to update stops with the new RouteId
-                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
-            // If validation fails, reload necessary data
-            model.AvailableBuses = GetBusesSelectList();
+            // Reload dropdown data if the ModelState is not valid
             model.AvailableLoops = GetLoopsSelectList();
             model.AvailableStops = GetStopsSelectList();
             return View(model);
         }
 
-        // POST: Routes/Edit/5
+        // POST: Route/UpdateStopOrder
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(RouteCreateModel model)
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> UpdateStopOrder(List<int> stopIds, int routeId)
         {
-            if (ModelState.IsValid)
+            var stops = await _context
+                .Stops.Where(s => s.RouteId == routeId && stopIds.Contains(s.Id))
+                .ToListAsync();
+            for (int i = 0; i < stopIds.Count; i++)
             {
-                var route = await _context.Routes.FindAsync(model.Id);
-                if (route == null)
+                var stop = stops.FirstOrDefault(s => s.Id == stopIds[i]);
+                if (stop != null)
                 {
-                    return NotFound();
+                    stop.Order = i;
                 }
-
-                route.RouteName = model.RouteName;
-                route.BusId = model.SelectedBusId;
-                route.LoopId = model.SelectedLoopId;
-
-                if (model.OrderedStopIds != null)
-                {
-                    var orderedStopIds = model
-                        .OrderedStopIds.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(int.Parse)
-                        .ToList();
-                    var stopEntities = _context
-                        .Stops.Where(s => orderedStopIds.Contains(s.Id))
-                        .ToList();
-
-                    foreach (var stopId in orderedStopIds)
-                    {
-                        var stop = stopEntities.FirstOrDefault(s => s.Id == stopId);
-                        if (stop != null)
-                        {
-                            stop.RouteId = route.Id; // Just to ensure it's correctly associated, not necessary if it's already set
-                        }
-                    }
-                }
-
-                _context.Update(route);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
             }
-
-            // If ModelState is not valid, reload dropdown data and return the Edit view
-            model.AvailableBuses = GetBusesSelectList();
-            model.AvailableLoops = GetLoopsSelectList();
-            model.AvailableStops = GetStopsSelectList();
-            return View(model);
-        }
-
-        // DELETE: Route/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var route = await _context.Routes.FindAsync(id);
-            if (route == null)
-            {
-                return NotFound();
-            }
-
-            // Disassociate stops from the route
-            foreach (var stop in route.Stops)
-            {
-                stop.RouteId = null;
-            }
-
-            _context.Routes.Remove(route);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return Ok();
         }
 
-        // GET: Route/EditStops/5
-        public async Task<IActionResult> EditStops(int? id)
+        // Helper method to get stops on a loop (via its route)
+        [Authorize(Roles = "Manager,Driver")] // Allow drivers to view stops
+        public async Task<IActionResult> GetStopsOnLoop(int loopId)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var route = await _context
                 .Routes.Include(r => r.Stops)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(r => r.LoopId == loopId);
 
             if (route == null)
-            {
-                return NotFound();
-            }
+                return NotFound("Route not found for the selected loop.");
 
-            var model = new EditStopsViewModel
+            var routeViewModel = new RouteViewModel
             {
-                RouteId = route.Id,
                 RouteName = route.RouteName,
                 Stops = route
                     .Stops.OrderBy(s => s.Order)
@@ -211,168 +132,128 @@ namespace BusShuttleDriver.Web.Controllers
                     {
                         Id = s.Id,
                         Name = s.Name,
-                        Order = s.Order
+                        Order = s.Order,
+                        Latitude = s.Latitude,
+                        Longitude = s.Longitude
                     })
                     .ToList()
             };
 
-            return View(model);
+            return View("DriverView", routeViewModel); // Assuming 'DriverView' is the view where drivers interact with route data
         }
 
-        // POST: Route/EditStops/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditStops(int id, EditStopsViewModel model)
+        // Helper method to update route stops
+        [Authorize(Roles = "Manager")]
+        private void UpdateRouteStops(string orderedStopIds, int routeId)
         {
-            if (id != model.RouteId)
+            if (string.IsNullOrEmpty(orderedStopIds))
+                return;
+
+            var orderedIds = orderedStopIds
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(int.Parse)
+                .ToList();
+            var stops = _context.Stops.Where(s => orderedIds.Contains(s.Id)).ToList();
+
+            foreach (var stop in stops)
             {
-                return NotFound();
+                stop.RouteId = routeId;
+                stop.Order = orderedIds.IndexOf(stop.Id);
             }
 
-            if (ModelState.IsValid)
-            {
-                var route = await _context
-                    .Routes.Include(r => r.Stops)
-                    .FirstOrDefaultAsync(r => r.Id == id);
-                if (route == null)
-                {
-                    return NotFound();
-                }
-
-                // Update stop orders based on the model
-                foreach (var stopModel in model.Stops)
-                {
-                    var stop = route.Stops.FirstOrDefault(s => s.Id == stopModel.Id);
-                    if (stop != null)
-                    {
-                        stop.Order = stopModel.Order;
-                    }
-                }
-
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-
-            // If we got this far, something failed, redisplay form
-            return View(model);
+            _context.SaveChanges();
         }
 
-        public async Task<IActionResult> Details(int? id)
+        // GET: Route/Edit/5
+        [HttpGet, ActionName("Edit")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var route = await _context
-                .Routes.Include(r => r.Stops)
-                .FirstOrDefaultAsync(r => r.Id == id);
-
+            var route = await _context.Routes.FindAsync(id);
             if (route == null)
             {
                 return NotFound();
             }
 
-            return View(route); // Pass route to the view
-        }
-
-        // POST: Entry/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Driver")]
-        public async Task<IActionResult> StartRoute(StartRouteViewModel model)
-        {
-            if (ModelState.IsValid)
+            var model = new RouteCreateModel
             {
-                try
-                {
-                    var driverId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get current logged-in driver's ID
-                    if (driverId == null)
-                        return NotFound("Driver not found.");
-
-                    var driver = await _context.Drivers.FindAsync(int.Parse(driverId)); // Retrieve the driver entity from the database
-                    if (driver == null)
-                        return NotFound("Driver not found.");
-
-                    // Check if driver has an active route session
-                    if (driver.ActiveRouteSessionId != null)
-                    {
-                        ModelState.AddModelError("", "You already have an active route session.");
-                        return View("Error", ModelState);
-                    }
-
-                    var routeSession = new RouteSession
-                    {
-                        BusId = model.SelectedBusId,
-                        LoopId = model.SelectedLoopId,
-                        StartTime = DateTime.Now,
-                        DriverId = driver.DriverId,
-                        IsActive = true
-                    };
-
-                    _context.RouteSessions.Add(routeSession);
-                    driver.ActiveRouteSessionId = routeSession.Id; // Set the active session ID
-                    await _context.SaveChangesAsync(); // Asynchronously save changes to the database
-
-                    // Redirect to Entry create view with session details
-                    return RedirectToAction(
-                        "Create",
-                        "Entry",
-                        new { routeSessionId = routeSession.Id }
-                    );
-                }
-                catch (Exception ex)
-                {
-                    // Log the error and display a message
-                    ModelState.AddModelError("", "Error starting route: " + ex.Message);
-                }
-            }
-
-            // Repopulate dropdowns if validation or save error
-            model.AvailableBuses = GetBusesSelectList();
-            model.AvailableLoops = GetLoopsSelectList();
-            return View("DriverIndex", model);
-        }
-
-        public async Task<IActionResult> EndRoute(int routeSessionId)
-        {
-            var routeSession = await _context.RouteSessions.FindAsync(routeSessionId);
-            if (routeSession == null)
-                return NotFound("Route session not found.");
-
-            var driver = await _context.Drivers.FindAsync(routeSession.DriverId);
-            if (driver != null)
-            {
-                driver.ActiveRouteSessionId = null; // Clear the active session
-            }
-
-            _context.RouteSessions.Remove(routeSession);
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Index", "Driver");
-        }
-
-        [Authorize(Roles = "Driver")]
-        public IActionResult DriverIndex()
-        {
-            var model = new StartRouteViewModel
-            {
-                AvailableBuses = GetBusesSelectList(),
-                AvailableLoops = GetLoopsSelectList()
+                Id = route.Id,
+                RouteName = route.RouteName,
+                SelectedLoopId = route.LoopId,
+                AvailableLoops = GetLoopsSelectList(),
+                AvailableStops = GetStopsSelectList()
             };
+
             return View(model);
         }
 
-        private List<SelectListItem> GetBusesSelectList()
+        // POST: Routes/Edit/5
+        [HttpPost, ActionName("Edit")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Manager")] // Only managers can edit routes
+        public async Task<IActionResult> Edit(RouteCreateModel model)
         {
-            return _context
-                .Buses.Select(b => new SelectListItem
-                {
-                    Value = b.BusId.ToString(),
-                    Text = b.BusNumber.ToString()
-                })
-                .ToList();
+            if (!ModelState.IsValid)
+            {
+                model.AvailableLoops = GetLoopsSelectList();
+                model.AvailableStops = GetStopsSelectList();
+                return View(model);
+            }
+
+            var route = await _context.Routes.FindAsync(model.Id);
+            if (route == null)
+            {
+                return NotFound();
+            }
+
+            route.RouteName = model.RouteName;
+            route.LoopId = model.SelectedLoopId;
+
+            _context.Update(route);
+            await _context.SaveChangesAsync();
+
+            UpdateRouteStops(model.OrderedStopIds, route.Id);
+
+            return RedirectToAction(nameof(Index));
         }
 
+        // DELETE: Route/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Manager")] // Only managers can delete routes
+        public async Task<IActionResult> Delete(int? id)
+        {
+            var route = await _context
+                .Routes.Include(r => r.Stops)
+                .FirstOrDefaultAsync(r => r.Id == id);
+            if (route == null)
+            {
+                return NotFound();
+            }
+
+            // Check if this is the only route associated with the loop
+            bool isLastRouteForLoop = !_context.Routes.Any(r =>
+                r.LoopId == route.LoopId && r.Id != id
+            );
+
+            foreach (var stop in route.Stops)
+            {
+                stop.RouteId = null; // Detach stops from the route
+            }
+
+            // Delete route
+            _context.Routes.Remove(route);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Helper methods to get select list items
+        [Authorize(Roles = "Manager,Driver")]
         private List<SelectListItem> GetLoopsSelectList()
         {
             return _context
@@ -380,6 +261,7 @@ namespace BusShuttleDriver.Web.Controllers
                 .ToList();
         }
 
+        [Authorize(Roles = "Manager,Driver")]
         private List<SelectListItem> GetStopsSelectList()
         {
             return _context

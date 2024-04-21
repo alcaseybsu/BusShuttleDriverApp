@@ -1,7 +1,7 @@
 @model IEnumerable<BusShuttleDriver.Web.ViewModels.StopViewModel>
 
 <h2>Stops</h2>
-
+<a href="@Url.Action("Create")" class="btn btn-success">Add New Stop</a>
 <table class="table">
     <thead>
         <tr>
@@ -20,15 +20,16 @@
                 <td>@Html.DisplayFor(modelItem => stop.Longitude)</td>
                 <td>
                     <!-- Adjusted link to include class for AJAX handling -->
-                    <a href="@Url.Action("Edit", new { id = stop.Id })" class="btn btn-primary edit-stop">Edit</a>
-                    <a href="@Url.Action("Delete", new { id = stop.Id })" class="btn btn-danger delete-stop">Delete</a>
+                    <button data-url="@Url.Action("Edit", new { id = stop.Id })"
+                        class="btn btn-primary edit-stop">Edit</button>
+                    <button data-url="@Url.Action("Delete", new { id = stop.Id })"
+                        class="btn btn-danger delete-stop">Delete</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
 
-<a href="@Url.Action("Create")" class="btn btn-success">Add New Stop</a>
 <a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary">Back to Dashboard</a>
 
 <!-- Modal for editing -->
@@ -51,26 +52,40 @@
 <script>
     $(document).ready(function () {
         // Handling the 'Edit' button click
-        $('.edit-stop').on('click', function (e) {
-            e.preventDefault();
-            var url = $(this).attr('href');
+        $('.edit-stop').on('click', function () {
+            var url = $(this).data('url');
             $.get(url, function (data) {
                 $('#editModalBody').html(data);
                 $('#editModal').modal('show');
             });
         });
 
+        // Handling the 'Delete' button click
+        $('.delete-stop').on('click', function () {
+            var url = $(this).data('url');
+            if (confirm('Are you sure you want to delete this stop?')) {
+                $.post(url, function () {
+                    location.reload(); // Reload the page to update the list
+                }).fail(function () {
+                    alert('Failed to delete.');
+                });
+            }
+        });
+
         // Handling the form submission inside the modal
-        $('#editModal').on('submit', '.edit-form', function (e) {
+        $('#editModal').on('submit', 'form', function (e) {
             e.preventDefault();
             var form = $(this);
             $.ajax({
                 url: form.attr('action'),
-                type: 'POST',
+                method: 'POST',
                 data: form.serialize(),
                 success: function (result) {
                     $('#editModal').modal('hide');
                     location.reload(); // Reload Index to update the list
+                },
+                error: function () {
+                    alert('Something went wrong. Please try again.');
                 }
             });
         });

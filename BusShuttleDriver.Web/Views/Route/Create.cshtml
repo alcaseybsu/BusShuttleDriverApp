@@ -8,17 +8,11 @@
 
 <form asp-action="Create" method="post">
     @Html.AntiForgeryToken()
-
+    <button type="submit" class="btn btn-primary">Create Route</button>
     <div class="form-group">
         <label asp-for="RouteName" class="control-label">Route Name</label>
         <input asp-for="RouteName" class="form-control" />
         <span asp-validation-for="RouteName" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="SelectedBusId" class="control-label">Select Bus</label>
-        <select asp-for="SelectedBusId" asp-items="Model.AvailableBuses" class="form-control"></select>
-        <span asp-validation-for="SelectedBusId" class="text-danger"></span>
     </div>
 
     <div class="form-group">
@@ -39,9 +33,8 @@
 
     <button type="button" id="moveUp" class="btn btn-secondary">Move Up</button>
     <button type="button" id="moveDown" class="btn btn-secondary">Move Down</button>
-
-    <button type="submit" class="btn btn-primary">Create Route</button>
 </form>
+<a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary">Back to Dashboard</a>
 
 <script>
     $(document).ready(function () {
@@ -64,7 +57,7 @@
         });
 
         function updateStopOrder() {
-            var orderedIds = $('#stopsList option').map(function() {
+            var orderedIds = $('#stopsList option').map(function () {
                 return $(this).val();
             }).get().join(',');
             $('#orderedStops').val(orderedIds);

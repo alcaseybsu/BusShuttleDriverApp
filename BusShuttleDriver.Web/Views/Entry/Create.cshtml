@@ -1,4 +1,4 @@
-@model BusShuttleDriver.Web.ViewModels.EntryViewModel  // Assuming you have a view model that includes stop information and a list of next stops.
+@model BusShuttleDriver.Web.ViewModels.EntryViewModel  
 
 @{
     ViewData["Title"] = "Route Entry";
@@ -49,7 +49,7 @@
         method: 'POST',
         body: formData,
         headers: {
-            'X-Requested-With': 'XMLHttpRequest'  // Important for ASP.NET Core to recognize AJAX request
+            'X-Requested-With': 'XMLHttpRequest'  // For ASP.NET Core to recognize AJAX request
         }
     })
     .then(response => response.json())

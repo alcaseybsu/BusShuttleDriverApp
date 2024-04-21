@@ -39,76 +39,46 @@ body {
   color: var(--black);
 }
 
-/* Navbar styling */
-.navbar {
+
+/* Sidebar styling */
+#sidebar-wrapper {
+  transition: all 0.5s ease;
+}
+
+#sidebar-wrapper .sidebar-heading {
+  background: var(--dark-gray);
+  color: var(--white);
+  text-align: center;
+  padding: 10px 15px;
+  font-size: 1.2em;
+}
+
+.list-group-item-action {
+  transition: color 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.list-group-item-action:hover {
   background-color: var(--cardinal-red);
   color: var(--white);
 }
 
-.navbar a {
-  color: var(--white);
-  transition: color 0.3s;
+/* Push sidebar a bit to the left and down */
+#sidebar-wrapper {
+  margin-left: -15px;
+  margin-top: 20px;
 }
 
-.navbar a:hover {
-  color: var(--light-gray);
-}
-
-/* Highlighting 'Start Route' */
-.navbar .start-route {
-  background-color: var(--white);
-  color: var(--cardinal-red);
-  padding: 5px 10px;
-  border-radius: 5px;
-}
-
-/* Sidebar and callouts using secondary colors */
-.sidebar {
-  background-color: var(--dark-gray);
-  color: var(--white);
-}
-
-.callout {
-  border-left: 5px solid var(--dark-red);
-  padding: 10px;
-  background-color: var(--light-gray);
-}
-
-/* Table styling */
-table {
-  border-color: var(--dark-gray);
-}
-
-th {
+/* Adjusting buttons to be more interesting */
+.btn-primary {
   background-color: var(--cardinal-red);
-  color: var(--white);
+  border: none;
 }
 
-td {
-  background-color: var(--white);
-  color: var(--black);
-}
-
-/* Button styling */
-button, .btn {
-  background-color: var(--cardinal-red);
-  color: var(--white);
-}
-
-button:hover, .btn:hover {
+.btn-primary:hover {
   background-color: var(--dark-red);
   color: var(--white);
 }
 
-/* Navbar Styles */
-.navbar {
-  background-color: #BA0C2F; /* Cardinal Red */
-  color: #FFFFFF; /* White */
-}
-
-.navbar a, .navbar a:hover, .navbar a:focus {
-  color: #FFFFFF; /* White */
-}
 
 /* Highlight "Start Route" specifically */
 .navbar .start-route {

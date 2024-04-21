@@ -27,18 +27,21 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var bus in Model.ExistingBuses)
+        @if (Model.ExistingBuses != null)
         {
-            <tr>
-                <td>@bus.BusNumber</td>
-                <td>
-                    <!-- Edit Link -->
-                    <a asp-action="Edit" asp-route-id="@bus.BusId" class="btn btn-secondary">Edit</a>
-                    <!-- Delete Link -->
-                    <a asp-action="Delete" asp-route-id="@bus.BusId" class="btn btn-danger"
-                        onclick="return confirm('Are you sure you want to delete this bus?');">Delete</a>
-                </td>
-            </tr>
+            @foreach (var bus in Model.ExistingBuses)
+            {
+                <tr>
+                    <td>@bus.BusNumber</td>
+                    <td>
+                        <!-- Edit Link -->
+                        <a asp-action="Edit" asp-route-id="@bus.BusId" class="btn btn-secondary">Edit</a>
+                        <!-- Delete Link -->
+                        <a asp-action="Delete" asp-route-id="@bus.BusId" class="btn btn-danger"
+                            onclick="return confirm('Are you sure you want to delete this bus?');">Delete</a>
+                    </td>
+                </tr>
+            }
         }
     </tbody>
 </table>

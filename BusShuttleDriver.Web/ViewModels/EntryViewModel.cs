@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using BusShuttleDriver.Domain.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BusShuttleDriver.Web.ViewModels
@@ -9,9 +10,15 @@ namespace BusShuttleDriver.Web.ViewModels
         [Required]
         public int RouteSessionId { get; set; }
 
+        public string? LoopName { get; set; }
+
         [Display(Name = "Stop")]
         [Required(ErrorMessage = "Please select a stop.")]
         public int SelectedStopId { get; set; }
+
+        [Display(Name = "Stop")]
+        [Required(ErrorMessage = "Please select a stop.")]
+        public string? StopName { get; set; }
 
         [Required(ErrorMessage = "Number of passengers boarded is required.")]
         [Range(0, int.MaxValue, ErrorMessage = "Number must be non-negative.")]

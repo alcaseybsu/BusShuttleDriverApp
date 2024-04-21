@@ -1,42 +1,41 @@
-@model IEnumerable<BusShuttleDriver.Domain.Models.RouteModel>
+@model IEnumerable<BusShuttleDriver.Web.ViewModels.EntryViewModel>
 
 @{
-    ViewData["Title"] = "Routes";
+    ViewData["Title"] = "Your Entries";
 }
 
 <h1>@ViewData["Title"]</h1>
 
 @if (!Model.Any())
 {
-    <p>No routes have been created yet.</p>
+    <p>No entries have been recorded yet.</p>
 }
 else
 {
     <table class="table">
         <thead>
             <tr>
-                <th>Route Name</th>
+                <th>Date/Time</th>
                 <th>Loop</th>
-                <th>Order</th>
-                <th>Actions</th>
+                <th>Stop</th>
+                <th>Boarded</th>
+                <th>Left Behind</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var route in Model)
+            @foreach (var entry in Model)
             {
                 <tr>
-                    <td>@Html.DisplayFor(modelItem => route.RouteName)</td>
-                    <td>@Html.DisplayFor(modelItem => route.Loop.Name)</td>
-                    <td>@Html.DisplayFor(modelItem => route.Order)</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@route.Id" class="btn btn-primary">Edit</a>
-                        <a asp-action="Delete" asp-route-id="@route.Id" class="btn btn-danger">Delete</a>
-                    </td>
+                    <td>@Html.DisplayFor(modelItem => entry.Timestamp)</td>
+                    <td>@Html.DisplayFor(modelItem => entry.LoopName)</td>
+                    <td>@Html.DisplayFor(modelItem => entry.SelectedStopId)</td>
+                    <td>@Html.DisplayFor(modelItem => entry.StopName)</td>
+                    <td>@Html.DisplayFor(modelItem => entry.Boarded)</td>
+                    <td>@Html.DisplayFor(modelItem => entry.LeftBehind)</td>
                 </tr>
             }
+
         </tbody>
     </table>
 }
-
-<a asp-action="Create" asp-controller="Route" class="btn btn-success">Create Route</a>
 

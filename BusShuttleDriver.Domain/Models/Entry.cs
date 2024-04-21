@@ -10,6 +10,12 @@ namespace BusShuttleDriver.Domain.Models
     {
         public int Id { get; set; }
 
+        [Display(Name = "Loop")]
+        public string? LoopName { get; set; }
+
+        [Display(Name = "Stop")]
+        public string? StopName { get; set; }
+
         [Display(Name = "Date & Time")]
         public DateTime Timestamp { get; set; }
 

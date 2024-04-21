@@ -6,29 +6,37 @@
 
 <h2>@ViewData["Title"]</h2>
 
+<a href="@Url.Action("Create", "Loop")" class="btn btn-success">Add New Loop</a>
+
 <table class="table">
     <thead>
         <tr>
             <th>Name</th>
-            <th>Details</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-    @foreach (var loop in Model)
-    {
-        <tr>
-            <td>@Html.DisplayFor(modelItem => loop.Name)</td>
-            <td><a asp-action="Details" asp-route-id="@loop.Id">View Details</a></td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@loop.Id">Edit</a>
-                <a asp-action="Delete" asp-route-id="@loop.Id">Delete</a>
-            </td>
-        </tr>
-    }
+        @if (Model != null && Model.Any())
+        {
+            foreach (var loop in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => loop.Name)</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@loop.Id" class="btn btn-primary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@loop.Id" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2">No loops available.</td>
+            </tr>
+        }
     </tbody>
 </table>
 
 <a asp-controller="Manager" asp-action="Dashboard" class="btn btn-primary">Back to Dashboard</a>
 
-<a href="@Url.Action("Create", "Loop")" class="btn btn-success">Add New Loop</a>

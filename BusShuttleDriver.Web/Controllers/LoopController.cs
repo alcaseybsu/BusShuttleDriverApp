@@ -1,9 +1,11 @@
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using BusShuttleDriver.Data;
 using BusShuttleDriver.Domain.Models;
 using BusShuttleDriver.Web.Models;
 using BusShuttleDriver.Web.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,14 +21,21 @@ namespace BusShuttleDriver.Web.Controllers
             _context = context;
         }
 
-        // GET: Loops
+        // GET: Loop/Index
         public async Task<IActionResult> Index()
         {
-            var loopsViewModel = await _context
-                .Loops.Select(loop => new LoopViewModel { Id = loop.Id, Name = loop.Name })
+            // Fetch loops that have associated routes with stops
+            var loops = await _context
+                .Loops.Include(l => l.Routes)
+                .Where(l => l.Routes.Any(r => r.Stops.Any()))
                 .ToListAsync();
 
-            return View(loopsViewModel);
+            // Convert the data to LoopViewModel
+            var loopViewModels = loops
+                .Select(loop => new LoopViewModel { Id = loop.Id, Name = loop.Name })
+                .ToList();
+
+            return View(loopViewModels); // Now returning the correct type
         }
 
         // GET: Loop/Create
@@ -134,12 +143,14 @@ namespace BusShuttleDriver.Web.Controllers
 
             if (loop.Routes.Any())
             {
-                // Handle the case where routes still reference this loop
+                // Error message - loop cannot be deleted; it's still in a route
                 return View(
                     "Error",
                     new ErrorViewModel
                     {
-                        Message = "Cannot delete loop because it has associated routes."
+                        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                        Message =
+                            "Cannot delete this loop because it is currently used by one or more routes."
                     }
                 );
             }

@@ -2,6 +2,8 @@
 
 <h2>Create New Driver</h2>
 
+<button type="submit" class="btn btn-primary">Create</button>
+
 <form asp-action="Create">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -27,7 +29,9 @@
         <label asp-for="Password" class="control-label"></label>
         <input asp-for="Password" type="password" class="form-control" />
         <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
+    </div>    
 
-    <button type="submit" class="btn btn-primary">Create</button>
+    <div class="col-md-6 text-right">
+        <a href="@Url.Action("Dashboard", "Manager")" class="btn btn-primary mt-2">Back to Dashboard</a>
+    </div>
 </form>

@@ -4,20 +4,16 @@
 
 <div class="d-flex" id="wrapper">
     <!-- Sidebar -->
-    <div class="bg-light border-right" id="sidebar-wrapper">
-        <div class="sidebar-heading">Manager Actions</div>
+    <div class="bg-light border-right" id="sidebar-wrapper" style="width: 250px;">
+        <div class="sidebar-heading" style="padding: 10px; background-color: var(--dark-gray); color: var(--white);">Manager Actions</div>
         <div class="list-group list-group-flush">
-            <a href="@Url.Action("Create","Bus")" class="list-group-item list-group-item-action bg-light">Manage Bus</a>
-            <a href="@Url.Action("Index","Loop")" class="list-group-item list-group-item-action bg-light">Manage
-                Loops</a>
-            <a href="@Url.Action("Index","Stop")" class="list-group-item list-group-item-action bg-light">Manage
-                Stops</a>
-            <a href="@Url.Action("Index","Route")" class="list-group-item list-group-item-action bg-light">Manage
-                Routes</a>
-            <a href="@Url.Action("Create","Entry")" class="list-group-item list-group-item-action bg-light">Start
-                Route</a>
-            <a href="@Url.Action("Index","Report")" class="list-group-item list-group-item-action bg-light">View
-                Reports</a>
+            <a href="@Url.Action("Index","Manager")" class="list-group-item list-group-item-action" style="color: var(--black); background-color: var(--light-gray); border-left: 5px solid var(--cardinal-red);">Manage Drivers</a>
+            <a href="@Url.Action("Create","Bus")" class="list-group-item list-group-item-action" style="color: var(--black); background-color: var(--light-gray);">Manage Bus</a>
+            <a href="@Url.Action("Index","Loop")" class="list-group-item list-group-item-action" style="color: var(--black); background-color: var(--light-gray);">Manage Loops</a>
+            <a href="@Url.Action("Index","Stop")" class="list-group-item list-group-item-action" style="color: var(--black); background-color: var(--light-gray);">Manage Stops</a>
+            <a href="@Url.Action("Index","Route")" class="list-group-item list-group-item-action" style="color: var(--black); background-color: var(--light-gray);">Manage Routes</a>
+            <a href="@Url.Action("Create","Entry")" class="list-group-item list-group-item-action" style="color: var(--black); background-color: var(--light-gray);">Start Route</a>
+            <a href="@Url.Action("Index","Report")" class="list-group-item list-group-item-action" style="color: var(--black); background-color: var(--light-gray);">View Reports</a>
         </div>
     </div>
 
@@ -25,7 +21,7 @@
     <div id="page-content-wrapper">
         <div class="container-fluid">
             <h1 class="mt-4">Manager Dashboard</h1>
-            <p>Select an action from the left to get started.</p>
+            <p>Select an action from the left to get started.</p>            
         </div>
     </div>
 </div>

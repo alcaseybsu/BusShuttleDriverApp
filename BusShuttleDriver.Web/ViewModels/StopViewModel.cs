@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BusShuttleDriver.Web.ViewModels
 {
@@ -7,8 +7,8 @@ namespace BusShuttleDriver.Web.ViewModels
     {
         public int Id { get; set; } // Primary key
         public string? Name { get; set; }
-        public double Latitude { get; set; }
         public int Order { get; set; }
+        public double Latitude { get; set; }
         public double Longitude { get; set; }
         public int SelectedLoopId { get; set; }
         public string? SelectedLoopName { get; set; }

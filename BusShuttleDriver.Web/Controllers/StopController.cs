@@ -130,6 +130,50 @@ namespace BusShuttleDriver.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // POST: Stops/UpdateStopOrder
+        [HttpPost]
+        public async Task<IActionResult> UpdateStopOrder(int stopId, int newPosition)
+        {
+            var stop = await _context.Stops.FindAsync(stopId);
+            if (stop == null)
+            {
+                return NotFound();
+            }
+
+            var currentOrder = stop.Order;
+            var stopsToUpdate = await _context
+                .Stops.Where(s => s.RouteId == stop.RouteId && s.Id != stopId)
+                .ToListAsync();
+
+            if (newPosition < currentOrder)
+            {
+                foreach (
+                    var s in stopsToUpdate.Where(s =>
+                        s.Order >= newPosition && s.Order < currentOrder
+                    )
+                )
+                {
+                    s.Order++;
+                }
+            }
+            else
+            {
+                foreach (
+                    var s in stopsToUpdate.Where(s =>
+                        s.Order <= newPosition && s.Order > currentOrder
+                    )
+                )
+                {
+                    s.Order--;
+                }
+            }
+
+            stop.Order = newPosition;
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
         // GET: Stops/Delete/{id}
         [HttpGet("Delete/{id}")]
         public async Task<IActionResult> Delete(int? id)
