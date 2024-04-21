@@ -21,13 +21,10 @@ body {
   margin-bottom: 60px;
 }
 
-
 /* Primary Colors */
 :root {
   --cardinal-red: #BA0C2F;
   --white: #FFFFFF;
-
-  /* Secondary Colors */
   --black: #000000;
   --dark-gray: #54585A;
   --light-gray: #E6E7E8;
@@ -38,7 +35,6 @@ body {
   background-color: var(--white);
   color: var(--black);
 }
-
 
 /* Sidebar styling */
 #sidebar-wrapper {
@@ -80,11 +76,9 @@ body {
 }
 
 
-/* Highlight "Start Route" specifically */
-.navbar .start-route {
-  background-color: #FFFFFF; /* White */
-  color: #BA0C2F; /* Cardinal Red */
-  padding: 5px 10px;
-  border-radius: 5px;
+/* Custom Button Styles */
+.btn-custom {
+  width: 150px;  /* Set a specific width */
+  padding: 10px 24px;  /* Consistent padding */
+  font-size: 16px;  /* Consistent font size */
 }
-

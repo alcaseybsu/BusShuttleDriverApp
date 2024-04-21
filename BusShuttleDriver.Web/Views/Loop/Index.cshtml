@@ -6,8 +6,6 @@
 
 <h2>@ViewData["Title"]</h2>
 
-<a href="@Url.Action("Create", "Loop")" class="btn btn-success">Add New Loop</a>
-
 <table class="table">
     <thead>
         <tr>
@@ -37,6 +35,7 @@
         }
     </tbody>
 </table>
-
-<a asp-controller="Manager" asp-action="Dashboard" class="btn btn-primary">Back to Dashboard</a>
-
+<div>
+    <a href="@Url.Action("Create", "Loop")" class="btn btn-success">Add New Loop</a>
+    <a asp-controller="Manager" asp-action="Dashboard" class="btn btn-primary" style="float:right">Back to Dashboard</a>
+</div>

@@ -53,6 +53,7 @@ namespace BusShuttleDriver.Web.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Manager,Driver")]
         public async Task<IActionResult> SignUp(SignUpViewModel model)
         {
             if (!ModelState.IsValid)
@@ -97,7 +98,7 @@ namespace BusShuttleDriver.Web.Controllers
 
             return isFirstUser
                 ? RedirectToAction("Dashboard", "Manager")
-                : RedirectToAction("Index", "Driver");
+                : RedirectToAction("Start", "Entry");
         }
 
         [HttpGet]
@@ -117,36 +118,15 @@ namespace BusShuttleDriver.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
-                {
-                    ModelState.AddModelError(string.Empty, "Username and password are required.");
-                    return View(model);
-                }
-
                 var user = await _userManager.FindByNameAsync(model.Username);
-                if (user == null || string.IsNullOrEmpty(model.Password))
+                if (user == null || !user.IsActive)
                 {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        "Invalid login attempt. Please check your credentials."
-                    );
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return View(model);
-                }
-
-                if (!user.IsActive)
-                {
-                    if (await _userManager.IsInRoleAsync(user, "Driver"))
-                    {
-                        ModelState.AddModelError(
-                            string.Empty,
-                            "Your account is not active. Please contact your manager."
-                        );
-                        return View(model);
-                    }
                 }
 
                 var result = await _signInManager.PasswordSignInAsync(
-                    model.Username,
+                    user,
                     model.Password,
                     model.RememberMe,
                     lockoutOnFailure: false
@@ -154,18 +134,15 @@ namespace BusShuttleDriver.Web.Controllers
 
                 if (result.Succeeded)
                 {
-                    if (user != null)
+                    var userRoles = await _userManager.GetRolesAsync(user);
+                    if (userRoles.Contains("Manager"))
                     {
-                        if (await _userManager.IsInRoleAsync(user, "Manager"))
-                        {
-                            return RedirectToAction("Dashboard", "Manager");
-                        }
-                        else if (await _userManager.IsInRoleAsync(user, "Driver"))
-                        {
-                            return RedirectToAction("Index", "Driver");
-                        }
+                        return RedirectToAction("Dashboard", "Manager");
                     }
-                    return LocalRedirect(returnUrl ?? "/");
+                    else if (userRoles.Contains("Driver"))
+                    {
+                        return RedirectToAction("Start", "Entry");
+                    }
                 }
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             }

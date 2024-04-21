@@ -6,17 +6,6 @@
 
 <h2>@ViewData["Title"]</h2>
 
-<!-- Error Message Display -->
-@if (ViewBag.ErrorMessage != null)
-{
-    <div class="alert alert-danger" role="alert">
-    @ViewBag.ErrorMessage
-</div>
-}
-
-<!-- Link to Create Route -->
-<a asp-action="Create" class="btn btn-success">Create New Route</a>
-
 <!-- Existing Routes List -->
 <table class="table">
     <thead>
@@ -34,8 +23,12 @@
                 <td>@Html.DisplayFor(modelItem => route.RouteName)</td>
                 <td>@Html.DisplayFor(modelItem => route.LoopName)</td>
                 <td>
-                    <!-- Display number of stops; click to view details -->
-                    <a asp-action="Details" asp-route-id="@route.Id">Stops (@route.StopsCount)</a>
+                    <ul class="list-unstyled">
+                        @foreach (var stop in route.Stops)
+                        {
+                            <li>@stop.Name</li>
+                        }
+                    </ul>
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@route.Id" class="btn btn-secondary">Edit</a>
@@ -45,8 +38,11 @@
         }
     </tbody>
 </table>
-<a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary">Back to Dashboard</a>
-
+<div>
+    <!-- Link to Create Route -->
+<a asp-action="Create" class="btn btn-success">Create New Route</a>
+<a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary" style="float:right">Back to Dashboard</a>
+</div>
 
 
 @section scripts {
@@ -60,8 +56,10 @@
                     $.ajax({
                         url: '@Url.Action("Delete", "Route")',
                         type: 'POST',
-                        data: { id: routeId,
-                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+                        data: {
+                            id: routeId,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
                         success: function (result) {
                             location.reload();  // Reload the page to update the list
                         },

@@ -51,11 +51,10 @@ namespace BusShuttleDriver.Web.Controllers
         }
 
         // GET: Route/Create
-        [Authorize(Roles = "Manager")]
         [HttpGet]
         public IActionResult Create()
         {
-            var model = new RouteCreateModel
+            var model = new BusShuttleDriver.Web.ViewModels.RouteCreateModel
             {
                 AvailableLoops = GetLoopsSelectList(),
                 AvailableStops = GetStopsSelectList()
@@ -63,7 +62,6 @@ namespace BusShuttleDriver.Web.Controllers
             return View(model);
         }
 
-        // POST: Route/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Manager")]
@@ -80,8 +78,18 @@ namespace BusShuttleDriver.Web.Controllers
                 _context.Routes.Add(route);
                 await _context.SaveChangesAsync(); // Save to generate route.Id
 
-                // Assuming UpdateStopOrder now correctly expects a List<int> for the first argument
-                await UpdateStopOrder(model.SelectedStopIds, route.Id); // Handle Stops
+                // Handle Stops: Assign selected stops to the route
+                var orderedStopIds = model.OrderedStopIds.Split(',').Select(int.Parse).ToList();
+                foreach (var stopId in orderedStopIds)
+                {
+                    var stop = await _context.Stops.FindAsync(stopId);
+                    if (stop != null)
+                    {
+                        stop.RouteId = route.Id;
+                        stop.Order = orderedStopIds.IndexOf(stopId); // Set the order based on the list
+                    }
+                }
+                await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
@@ -180,7 +188,7 @@ namespace BusShuttleDriver.Web.Controllers
                 return NotFound();
             }
 
-            var model = new RouteCreateModel
+            var model = new BusShuttleDriver.Web.ViewModels.RouteCreateModel
             {
                 Id = route.Id,
                 RouteName = route.RouteName,
@@ -196,7 +204,9 @@ namespace BusShuttleDriver.Web.Controllers
         [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Manager")] // Only managers can edit routes
-        public async Task<IActionResult> Edit(RouteCreateModel model)
+        public async Task<IActionResult> Edit(
+            BusShuttleDriver.Web.ViewModels.RouteCreateModel model
+        )
         {
             if (!ModelState.IsValid)
             {

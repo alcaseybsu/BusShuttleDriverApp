@@ -1,7 +1,7 @@
 @model IEnumerable<BusShuttleDriver.Web.ViewModels.StopViewModel>
 
 <h2>Stops</h2>
-<a href="@Url.Action("Create")" class="btn btn-success">Add New Stop</a>
+
 <table class="table">
     <thead>
         <tr>
@@ -29,8 +29,9 @@
         }
     </tbody>
 </table>
+<a href="@Url.Action("Create")" class="btn btn-success">Add New Stop</a>
 
-<a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary">Back to Dashboard</a>
+<a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary" style="float:right">Back to Dashboard</a>
 
 <!-- Modal for editing -->
 <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">

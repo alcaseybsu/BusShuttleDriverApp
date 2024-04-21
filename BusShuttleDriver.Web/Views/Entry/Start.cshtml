@@ -1,0 +1,20 @@
+@model BusShuttleDriver.Web.ViewModels.StartRouteViewModel
+
+@{
+    ViewData["Title"] = "Driver Dashboard";
+}
+
+<div class="container mt-5">
+    <h1 class="display-4 text-center">Start Your Route</h1>
+    <form asp-action="StartRoute" method="post" class="mt-4">
+        <div class="form-group">
+            <label for="loopSelect" class="h3">Select Loop:</label>
+            <select id="loopSelect" asp-for="SelectedLoopId" asp-items="Model.AvailableLoops" class="form-control form-control-lg"></select>
+        </div>
+        <div class="form-group">
+            <label for="busSelect" class="h3">Select Bus:</label>
+            <select id="busSelect" asp-for="SelectedBusId" asp-items="Model.AvailableBuses" class="form-control form-control-lg"></select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Start Route</button>
+    </form>
+</div>
