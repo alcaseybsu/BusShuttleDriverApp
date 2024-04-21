@@ -22,30 +22,35 @@ namespace BusShuttleDriver.Web.Controllers
         }
 
         // GET: Loop/Index
+        [HttpGet("Loop/Index")]
         public async Task<IActionResult> Index()
         {
-            // Fetch loops that have associated routes with stops
-            var loops = await _context
-                .Loops.Include(l => l.Routes)
-                .Where(l => l.Routes.Any(r => r.Stops.Any()))
-                .ToListAsync();
+            // Fetch all loops
+            var loops = await _context.Loops.ToListAsync();
 
             // Convert the data to LoopViewModel
             var loopViewModels = loops
-                .Select(loop => new LoopViewModel { Id = loop.Id, Name = loop.Name })
+                .Select(loop => new LoopViewModel
+                {
+                    Id = loop.Id,
+                    Name = loop.Name,
+                    // You might want to include information whether the loop has associated routes with stops
+                    HasActiveRoutes = loop.Routes.Any(r => r.Stops.Any())
+                })
                 .ToList();
 
-            return View(loopViewModels); // Now returning the correct type
+            return View(loopViewModels); // Return the list of all loops with additional info
         }
 
         // GET: Loop/Create
+        [HttpGet("Loop/Create")]
         public IActionResult Create()
         {
             return View();
         }
 
         // POST: Loop/Create
-        [HttpPost]
+        [HttpPost("Loop/Create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(LoopViewModel viewModel)
         {
@@ -73,6 +78,7 @@ namespace BusShuttleDriver.Web.Controllers
         }
 
         // GET: Loop/Edit/{id}
+        [HttpGet("Loop/Edit/{id}")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -92,7 +98,7 @@ namespace BusShuttleDriver.Web.Controllers
         }
 
         // POST: Loop/Edit/{id}
-        [HttpPost]
+        [HttpPost("Loop/Edit/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, LoopViewModel viewModel)
         {
@@ -125,39 +131,46 @@ namespace BusShuttleDriver.Web.Controllers
         }
 
         // GET: Loop/Delete/{id}
+        [HttpGet("Loop/Delete/{id}")]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                return NotFound("Loop ID not specified.");
             }
 
             var loop = await _context
                 .Loops.Include(l => l.Routes)
                 .FirstOrDefaultAsync(l => l.Id == id);
-
             if (loop == null)
             {
-                return NotFound();
+                return NotFound("Loop not found.");
             }
 
-            if (loop.Routes.Any())
+            try
             {
-                // Error message - loop cannot be deleted; it's still in a route
+                // If the loop is associated with any routes, disassociate them
+                foreach (var route in loop.Routes)
+                {
+                    route.LoopId = null; // Disassociate the loop from the route
+                }
+
+                _context.Loops.Remove(loop);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
                 return View(
                     "Error",
                     new ErrorViewModel
                     {
                         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                        Message =
-                            "Cannot delete this loop because it is currently used by one or more routes."
+                        Message = "An error occurred while deleting the loop: " + ex.Message
                     }
                 );
             }
-
-            _context.Loops.Remove(loop);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BusShuttleDriver.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240421035844_FixLoops")]
-    partial class FixLoops
+    [Migration("20240421075419_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

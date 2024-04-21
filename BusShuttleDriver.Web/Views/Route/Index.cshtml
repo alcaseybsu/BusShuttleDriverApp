@@ -60,7 +60,8 @@
                     $.ajax({
                         url: '@Url.Action("Delete", "Route")',
                         type: 'POST',
-                        data: { id: routeId },
+                        data: { id: routeId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
                         success: function (result) {
                             location.reload();  // Reload the page to update the list
                         },

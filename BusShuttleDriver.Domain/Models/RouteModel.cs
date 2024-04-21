@@ -16,7 +16,7 @@ namespace BusShuttleDriver.Domain.Models
 
         public int? LoopId { get; set; } // Foreign key for Loop
 
-        public Loop Loop { get; set; } = new Loop(); // Initialize to avoid null ref
+        public Loop? Loop { get; set; } // Navigation property
 
         public ICollection<Stop> Stops { get; set; } = new List<Stop>();
     }

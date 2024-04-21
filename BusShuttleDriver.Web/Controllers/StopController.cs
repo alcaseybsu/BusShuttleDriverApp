@@ -20,7 +20,8 @@ namespace BusShuttleDriver.Web.Controllers
             _context = context;
         }
 
-        // GET: Stops
+        // GET: Stop/Index
+        [HttpGet("Stop/Index")]
         public async Task<IActionResult> Index()
         {
             var stops = await _context
@@ -36,14 +37,14 @@ namespace BusShuttleDriver.Web.Controllers
             return View(stops);
         }
 
-        // GET: Stops/Create
+        // GET: Stop/Create
         public IActionResult Create()
         {
             return View(new StopViewModel());
         }
 
-        // POST: Stops/Create
-        [HttpPost]
+        // POST: Stop/Create
+        [HttpPost("Stop/Create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(StopViewModel viewModel)
         {
@@ -130,7 +131,7 @@ namespace BusShuttleDriver.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: Stops/UpdateStopOrder
+        // POST: Stop/UpdateStopOrder
         [HttpPost]
         public async Task<IActionResult> UpdateStopOrder(int stopId, int newPosition)
         {
@@ -174,8 +175,8 @@ namespace BusShuttleDriver.Web.Controllers
             return Ok();
         }
 
-        // GET: Stops/Delete/{id}
-        [HttpGet("Delete/{id}")]
+        // GET: Stop/Delete/{id}
+        [HttpGet("Stop/Delete/{id}")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)

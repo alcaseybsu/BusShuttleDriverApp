@@ -5,7 +5,7 @@
 namespace BusShuttleDriver.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class FixingLoops : Migration
+    public partial class UpdateRouteStops : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

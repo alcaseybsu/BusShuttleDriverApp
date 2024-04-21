@@ -47,7 +47,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(r => r.Loop) // Route has one Loop
             .WithMany(l => l.Routes) // Loop has many Routes
             .HasForeignKey(r => r.LoopId) // Foreign key in Route
-            .OnDelete(DeleteBehavior.SetNull); // Set LoopId to null if Loop is deleted
+            .OnDelete(DeleteBehavior.SetNull);
 
         // Stop to Route relationship
         modelBuilder
@@ -56,12 +56,20 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(r => r.Stops) // Route has many Stops
             .HasForeignKey(s => s.RouteId) // Foreign key in Stop pointing to Route
             .IsRequired(false) // Make foreign key optional
-            .OnDelete(DeleteBehavior.SetNull); // Set RouteId to null if Route is deleted
+            .OnDelete(DeleteBehavior.SetNull); // Set RouteId to null (stops aren't deleted)
 
         modelBuilder.Entity<Stop>().Property(s => s.Name).IsRequired().HasMaxLength(100); // Stop name max length
 
         // Ensure unique order for Stops within the same Route
         modelBuilder.Entity<Stop>().HasIndex(s => new { s.RouteId, s.Order }).IsUnique();
+
+        // one-to-many: Route and Stops
+        modelBuilder
+            .Entity<RouteModel>()
+            .HasMany(r => r.Stops)
+            .WithOne(s => s.Route)
+            .HasForeignKey(s => s.RouteId)
+            .OnDelete(DeleteBehavior.SetNull); // Set RouteId to null if Route is deleted
 
         // Driver to RouteSession relationship
         modelBuilder

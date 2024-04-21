@@ -18,10 +18,9 @@ namespace BusShuttleDriver.Domain.Models
 
         [Required(ErrorMessage = "Longitude is required.")]
         public double Longitude { get; set; }
+        public int Order { get; set; } // Order of the stop in the route
 
         public int? RouteId { get; set; } // Foreign key for Route
-        public RouteModel Route { get; set; } = new RouteModel(); // Initialize to avoid null reference
-
-        public int Order { get; set; } // Order of the stop in the route
+        public RouteModel Route { get; set; } = new RouteModel();
     }
 }
