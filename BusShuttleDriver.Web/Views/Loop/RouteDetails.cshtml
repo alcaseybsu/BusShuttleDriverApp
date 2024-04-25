@@ -1,0 +1,21 @@
+@model BusShuttleDriver.Web.ViewModels.RouteDetailsViewModel
+
+<h2>Loop Details</h2>
+
+<div>
+    <h4>@Model.LoopName</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Stops</dt>
+        <dd class="col-sm-10">
+            <ul>
+                @foreach (var stop in Model.Stops)
+                {
+                    <li>@stop.Name (@stop.Latitude, @stop.Longitude)</li>
+                }
+            </ul>
+        </dd>
+    </dl>
+    <a asp-action="Index" class="btn btn-default">Back to Dashboard</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit Loop</a>
+</div>

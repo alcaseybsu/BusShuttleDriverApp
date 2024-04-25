@@ -1,4 +1,4 @@
-@model BusShuttleDriver.Web.ViewModels.RouteCreateModel
+@model BusShuttleDriver.Web.ViewModels.RouteCreateViewModel
 
 @{
     ViewData["Title"] = "Edit Route";
@@ -8,12 +8,6 @@
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
-    
-    <div class="form-group">
-        <label asp-for="RouteName" class="control-label">Route Name</label>
-        <input asp-for="RouteName" class="form-control" />
-        <span asp-validation-for="RouteName" class="text-danger"></span>
-    </div>
 
     <div class="form-group">
         <label asp-for="SelectedLoopId" class="control-label">Loop</label>
@@ -25,4 +19,3 @@
         <a asp-action="Index" class="btn btn-secondary">Cancel</a>
     </div>
 </form>
-

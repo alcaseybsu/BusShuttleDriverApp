@@ -1,0 +1,39 @@
+@model BusShuttleDriver.Web.ViewModels.ReportViewModel
+
+@{
+    ViewData["Title"] = "Hourly Report";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (Model.LoopReports != null && Model.LoopReports.Count > 0)
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Hour</th>
+                @for (int hour = 0; hour < 24; hour++)
+                {
+                    <th>@hour:00 - @hour:59</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var report in Model.LoopReports)
+            {
+                <tr>
+                    <td>@report.LoopName</td> <!-- Assuming there's a property for LoopName -->
+                    @for (int hour = 0; hour < report.HourlyBoarded.Length; hour++)
+                    {
+                        <td>@report.HourlyBoarded[hour]</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No data available for the selected date.</p>
+}
+

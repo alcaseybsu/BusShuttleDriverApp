@@ -8,7 +8,7 @@ namespace BusShuttleDriver.Web.ViewModels
     public class EntryViewModel
     {
         [Required]
-        public int RouteSessionId { get; set; }
+        public int SessionId { get; set; }
 
         public string? LoopName { get; set; }
 

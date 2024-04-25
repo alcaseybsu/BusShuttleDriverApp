@@ -1,4 +1,4 @@
-@model BusShuttleDriver.Web.ViewModels.EntryViewModel  
+@model BusShuttleDriver.Web.ViewModels.EntryViewModel
 
 @{
     ViewData["Title"] = "Route Entry";
@@ -8,11 +8,12 @@
 
 <form asp-action="SubmitEntry" method="post" class="entry-form" id="entryForm">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    
+
     <!-- Stop Selector -->
     <div class="form-group">
         <label asp-for="SelectedStopId" class="control-label">Current Stop</label>
-        <select asp-for="SelectedStopId" asp-items="Model.AvailableStops" class="form-control form-control-lg" onchange="autoAdvance()">
+        <select asp-for="SelectedStopId" asp-items="Model.AvailableStops" class="form-control form-control-lg"
+            onchange="autoAdvance()">
         </select>
     </div>
 
@@ -40,34 +41,42 @@
 <button type="button" class="btn btn-danger btn-lg" id="endRouteBtn" style="display:none;">End Route</button>
 
 <script>
-    document.getElementById('entryForm').addEventListener('submit', function(e) {
-    e.preventDefault();  // Prevent the normal form submission
+    document.getElementById('entryForm').addEventListener('submit', function (e) {
+        e.preventDefault();  // Prevent the normal form submission
 
-    const formData = new FormData(this);
+        const formData = new FormData(this);
 
-    fetch('@Url.Action("SubmitEntry", "Entry")', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'  // For ASP.NET Core to recognize AJAX request
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            var select = document.getElementById('SelectedStopId');
-            if (select.selectedIndex < select.options.length - 1) {
-                select.selectedIndex++;  // Move to next stop
-            } else {
-                // Last stop, show End Route button
-                document.getElementById('endRouteBtn').style.display = 'block';
+        fetch('@Url.Action("SubmitEntry", "Entry")', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'  // For ASP.NET Core to recognize AJAX request
             }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    autoAdvance();
+                } else {
+                    alert('Failed to save entry. ' + data.message);  // Provide more specific error message from server
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+    });
+
+    function autoAdvance() {
+        var select = document.getElementById('SelectedStopId');
+        if (select.selectedIndex < select.options.length - 1) {
+            select.selectedIndex++;  // Move to next stop
         } else {
-            alert('Failed to save entry. Please try again.');
+            // Last stop, show End Route button
+            document.getElementById('endRouteBtn').style.display = 'block';
         }
-    })
-    .catch(error => console.error('Error:', error));
-});
+    }
+
 </script>
 
 

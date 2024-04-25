@@ -19,7 +19,7 @@
             foreach (var loop in Model)
             {
                 <tr>
-                    <td>@Html.DisplayFor(modelItem => loop.Name)</td>
+                    <td>@Html.DisplayFor(modelItem => loop.LoopName)</td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@loop.Id" class="btn btn-primary">Edit</a>
                         <a asp-action="Delete" asp-route-id="@loop.Id" class="btn btn-danger">Delete</a>

@@ -5,21 +5,33 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 using BusShuttleDriver.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusShuttleDriver.Domain.Models
 {
-    public class RouteSession
+    public class Session
     {
+        [Key]
         public int Id { get; set; }
-        public int RouteId { get; set; }
-        public virtual RouteModel Route { get; set; } = new RouteModel();
+
+        [Required]
+        public DateTime Timestamp { get; set; }
+
+        [Required]
+        public bool IsActive { get; set; }
+
+        // Foreign key to Bus
+        [Required]
         public int BusId { get; set; }
         public Bus? Bus { get; set; }
+
+        // Foreign key to Loop
+        [Required]
         public int LoopId { get; set; }
         public Loop? Loop { get; set; }
-        public DateTime StartTime { get; set; }
-        public int DriverId { get; set; } // Track which driver is logged in
+
+        [ForeignKey("Driver")]
+        public int? DriverId { get; set; }
         public Driver? Driver { get; set; }
-        public bool IsActive { get; set; } = true; // Indicates if route currently active
     }
 }

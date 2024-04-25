@@ -1,7 +1,8 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using BusShuttleDriver.Data;
 using BusShuttleDriver.Domain.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BusShuttleDriver.Web;
 
@@ -11,13 +12,23 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // Configure your ApplicationDbContext with detailed logging
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(connectionString));
+            options
+                .UseSqlite(connectionString)
+                .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
+        );
 
-        builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+        // Configure Identity
+        builder
+            .Services.AddDefaultIdentity<ApplicationUser>(options =>
+                options.SignIn.RequireConfirmedAccount = false
+            )
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
+
+        // Add controllers and views
         builder.Services.AddControllersWithViews();
 
         var app = builder.Build();
@@ -39,7 +50,8 @@ public class Program
 
         app.MapControllerRoute(
             name: "default",
-            pattern: "{controller=Account}/{action=Login}/{id?}");
+            pattern: "{controller=Account}/{action=Login}/{id?}"
+        );
 
         app.MapRazorPages();
 

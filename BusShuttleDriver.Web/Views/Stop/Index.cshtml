@@ -8,6 +8,7 @@
             <th>Name</th>
             <th>Latitude</th>
             <th>Longitude</th>
+            <th>Loop</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -18,20 +19,20 @@
                 <td>@Html.DisplayFor(modelItem => stop.Name)</td>
                 <td>@Html.DisplayFor(modelItem => stop.Latitude)</td>
                 <td>@Html.DisplayFor(modelItem => stop.Longitude)</td>
+                <td>@Html.DisplayFor(modelItem => stop.LoopName)</td>
                 <td>
-                    <!-- Adjusted link to include class for AJAX handling -->
-                    <button data-url="@Url.Action("Edit", new { id = stop.Id })"
+                    <button data-url="@Url.Action("Edit", "Stop", new { id = stop.Id })"
                         class="btn btn-primary edit-stop">Edit</button>
-                    <button data-url="@Url.Action("Delete", new { id = stop.Id })"
+                    <button data-url="@Url.Action("Delete", "Stop", new { id = stop.Id })"
                         class="btn btn-danger delete-stop">Delete</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
-<a href="@Url.Action("Create")" class="btn btn-success">Add New Stop</a>
-
+<a href="@Url.Action("Create", "Stop")" class="btn btn-success">Add New Stop</a>
 <a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary" style="float:right">Back to Dashboard</a>
+
 
 <!-- Modal for editing -->
 <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
@@ -50,6 +51,8 @@
     </div>
 </div>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
     $(document).ready(function () {
         // Handling the 'Edit' button click
@@ -65,7 +68,7 @@
         $('.delete-stop').on('click', function () {
             var url = $(this).data('url');
             if (confirm('Are you sure you want to delete this stop?')) {
-                $.post(url, function () {
+                $.post(url, { _method: 'delete' }).done(function () {
                     location.reload(); // Reload the page to update the list
                 }).fail(function () {
                     alert('Failed to delete.');

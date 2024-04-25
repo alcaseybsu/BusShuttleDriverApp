@@ -1,0 +1,44 @@
+@model BusShuttleDriver.Web.ViewModels.RouteCreateViewModel
+
+@{
+    ViewData["Title"] = "Create Route";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="RouteCreate" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        <label asp-for="SelectedLoopId" class="control-label">Select Loop</label>
+        <select asp-for="SelectedLoopId" asp-items="Model.AvailableLoops" class="form-control"></select>
+        <span asp-validation-for="SelectedLoopId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="OrderedStopIds" class="control-label">Select Stops</label>
+        <select asp-for="OrderedStopIds" asp-items="Model.AvailableStops" class="form-control" multiple="multiple">
+            <!-- Render options here -->
+        </select>
+        <span asp-validation-for="OrderedStopIds" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Route</button>
+    <a href="@Url.Action("Index", "Home")" class="btn btn-secondary" style="float:right">Back to Dashboard</a>
+</form>
+
+@section Scripts {
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        // Sortable
+        $(function() {
+            $("#sortable").sortable({
+                update: function(event, ui) {
+                    var order = $(this).sortable('toArray').toString();
+                    $('#orderedStops').val(order);
+                }
+            });
+            $("#sortable").disableSelection();
+        });
+    </script>
+}

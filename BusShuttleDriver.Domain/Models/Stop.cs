@@ -1,26 +1,31 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusShuttleDriver.Domain.Models
 {
     public class Stop
     {
-        public int Id { get; set; } // Primary key
+        [Key]
+        public int Id { get; set; }
 
-        [Required(ErrorMessage = "Stop name is required.")]
-        public string Name { get; set; } = string.Empty; // Ensure never null
+        [Required, StringLength(100)]
+        public string? Name { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Latitude is required.")]
+        [Required]
         public double Latitude { get; set; }
 
-        [Required(ErrorMessage = "Longitude is required.")]
+        [Required]
         public double Longitude { get; set; }
-        public int Order { get; set; } // Order of the stop in the route
 
-        public int? RouteId { get; set; } // Foreign key for Route
-        public RouteModel Route { get; set; } = new RouteModel();
+        public int Order { get; set; }
+
+        public int? LoopId { get; set; } // Make nullable
+
+        public virtual Loop? Loop { get; set; }
     }
 }

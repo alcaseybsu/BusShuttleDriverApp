@@ -1,5 +1,7 @@
 @model BusShuttleDriver.Web.ViewModels.StopViewModel
 
+<h2>Create New Stop</h2>
+
 <form asp-action="Create" method="post">
     @Html.AntiForgeryToken()
     <div class="form-group">
@@ -18,5 +20,11 @@
         <span asp-validation-for="Longitude" class="text-danger"></span>
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
+    <a href="@Url.Action("Index", "Stop")" class="btn btn-info" style="margin-left: 10px;">Back to List</a>
     <a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary" style="float:right">Back to Dashboard</a>
 </form>
+
+
+
+
+

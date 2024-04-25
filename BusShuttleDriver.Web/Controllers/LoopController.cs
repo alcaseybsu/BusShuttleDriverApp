@@ -1,12 +1,11 @@
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using BusShuttleDriver.Data;
 using BusShuttleDriver.Domain.Models;
-using BusShuttleDriver.Web.Models;
 using BusShuttleDriver.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace BusShuttleDriver.Web.Controllers
@@ -22,63 +21,54 @@ namespace BusShuttleDriver.Web.Controllers
         }
 
         // GET: Loop/Index
-        [HttpGet("Loop/Index")]
         public async Task<IActionResult> Index()
         {
-            // Fetch all loops
-            var loops = await _context.Loops.ToListAsync();
-
-            // Convert the data to LoopViewModel
-            var loopViewModels = loops
+            var loops = await _context
+                .Loops.Include(l => l.Stops)
                 .Select(loop => new LoopViewModel
                 {
                     Id = loop.Id,
-                    Name = loop.Name,
-                    // You might want to include information whether the loop has associated routes with stops
-                    HasActiveRoutes = loop.Routes.Any(r => r.Stops.Any())
+                    LoopName = loop.LoopName,
+                    StopsCount = loop.Stops.Count,
+                    Stops = loop
+                        .Stops.OrderBy(s => s.Order)
+                        .Select(s => new StopViewModel
+                        {
+                            Id = s.Id,
+                            Name = s.Name,
+                            Latitude = s.Latitude,
+                            Longitude = s.Longitude
+                        })
+                        .ToList()
                 })
-                .ToList();
+                .ToListAsync();
 
-            return View(loopViewModels); // Return the list of all loops with additional info
+            return View(loops);
         }
 
         // GET: Loop/Create
-        [HttpGet("Loop/Create")]
         public IActionResult Create()
         {
-            return View();
+            var model = new LoopViewModel();
+            return View(model);
         }
 
         // POST: Loop/Create
-        [HttpPost("Loop/Create")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(LoopViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                if (viewModel == null)
-                {
-                    throw new ArgumentNullException(nameof(viewModel));
-                }
-
-                if (viewModel.Name == null)
-                {
-                    throw new ArgumentException("ViewModel.Name is null", nameof(viewModel));
-                }
-
-                var loop = new Loop { Name = viewModel.Name };
-
+                var loop = new Loop { LoopName = viewModel.LoopName };
                 _context.Add(loop);
                 await _context.SaveChangesAsync();
-
                 return RedirectToAction(nameof(Index));
             }
-
             return View(viewModel);
         }
 
         // GET: Loop/Edit/{id}
-        [HttpGet("Loop/Edit/{id}")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -92,13 +82,12 @@ namespace BusShuttleDriver.Web.Controllers
                 return NotFound();
             }
 
-            var viewModel = new LoopViewModel { Id = loop.Id, Name = loop.Name };
-
+            var viewModel = new LoopViewModel { Id = loop.Id, LoopName = loop.LoopName };
             return View(viewModel);
         }
 
         // POST: Loop/Edit/{id}
-        [HttpPost("Loop/Edit/{id}")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, LoopViewModel viewModel)
         {
@@ -115,13 +104,7 @@ namespace BusShuttleDriver.Web.Controllers
                     return NotFound();
                 }
 
-                if (viewModel.Name == null)
-                {
-                    throw new ArgumentException("ViewModel.Name is null", nameof(viewModel));
-                }
-
-                loop.Name = viewModel.Name;
-
+                loop.LoopName = viewModel.LoopName;
                 _context.Update(loop);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -130,9 +113,9 @@ namespace BusShuttleDriver.Web.Controllers
             return View(viewModel);
         }
 
-        // GET: Loop/Delete/{id}
-        [HttpGet("Loop/Delete/{id}")]
-        [Authorize(Roles = "Manager")]
+        // DELETE: Loop/Delete/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -141,36 +124,108 @@ namespace BusShuttleDriver.Web.Controllers
             }
 
             var loop = await _context
-                .Loops.Include(l => l.Routes)
+                .Loops.Include(l => l.Stops)
                 .FirstOrDefaultAsync(l => l.Id == id);
             if (loop == null)
             {
                 return NotFound("Loop not found.");
             }
 
-            try
+            if (loop.Stops.Any())
             {
-                // If the loop is associated with any routes, disassociate them
-                foreach (var route in loop.Routes)
+                return BadRequest("Loop cannot be deleted because it has associated stops.");
+            }
+
+            _context.Loops.Remove(loop);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: RouteIndex
+        public async Task<IActionResult> RouteIndex()
+        {
+            var loops = await _context
+                .Loops.Include(l => l.Stops)
+                .Select(l => new RouteViewModel
                 {
-                    route.LoopId = null; // Disassociate the loop from the route
+                    Id = l.Id,
+                    LoopName = l.LoopName,
+                    Stops = l
+                        .Stops.Select(s => new StopViewModel
+                        {
+                            Name = s.Name,
+                            Latitude = s.Latitude,
+                            Longitude = s.Longitude
+                        })
+                        .ToList(),
+                    RouteName = l.LoopName
+                })
+                .ToListAsync();
+
+            return View("RouteIndex", loops);
+        }
+
+        // GET: Loop/RouteCreate
+        public async Task<IActionResult> CreateRoute()
+        {
+            var viewModel = new RouteCreateViewModel
+            {
+                AvailableLoops = new SelectList(
+                    await _context.Loops.ToListAsync(),
+                    "Id",
+                    "LoopName"
+                ),
+                AvailableStops = new SelectList(await _context.Stops.ToListAsync(), "Id", "Name")
+            };
+            return View(viewModel);
+        }
+
+        // POST: Loop/RouteCreate
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateRoute(RouteCreateViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var loop = await _context
+                    .Loops.Include(l => l.Stops)
+                    .FirstOrDefaultAsync(l => l.Id == viewModel.SelectedLoopId);
+                if (loop == null)
+                {
+                    ModelState.AddModelError("", "The selected loop does not exist.");
+                    return View(viewModel);
                 }
 
-                _context.Loops.Remove(loop);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                return View(
-                    "Error",
-                    new ErrorViewModel
+                // Reset the order for all stops in the loop
+                foreach (var stop in loop.Stops)
+                {
+                    stop.Order = int.MaxValue; // Set a high order value to ensure it goes to the end if not included in the new order list
+                }
+
+                // Update the order of stops based on the provided list
+                int order = 1;
+                foreach (var stopId in viewModel.OrderedStopIds)
+                {
+                    var stop = loop.Stops.FirstOrDefault(s => s.Id == stopId);
+                    if (stop != null)
                     {
-                        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                        Message = "An error occurred while deleting the loop: " + ex.Message
+                        stop.Order = order++;
                     }
-                );
+                }
+
+                // Save the updated order
+                await _context.SaveChangesAsync();
+                return RedirectToAction("RouteIndex"); // Assuming RouteIndex is the view that lists all "routes"
             }
+
+            // Re-populate the AvailableLoops if returning to the form
+            viewModel.AvailableLoops = new SelectList(
+                await _context.Loops.ToListAsync(),
+                "Id",
+                "LoopName",
+                viewModel.SelectedLoopId
+            );
+            return View(viewModel);
         }
     }
 }

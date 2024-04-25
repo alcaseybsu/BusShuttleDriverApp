@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BusShuttleDriver.Web.ViewModels
 {
-
     public class LoginViewModel
     {
         [Display(Name = "Email")]
@@ -13,5 +12,4 @@ namespace BusShuttleDriver.Web.ViewModels
         public string? Password { get; set; }
         public bool RememberMe { get; set; }
     }
-
 }

@@ -8,8 +8,8 @@ namespace BusShuttleDriver.Web.ViewModels
     public class RouteViewModel
     {
         public int Id { get; set; }
-        public string? RouteName { get; set; }
-        public string? LoopName { get; set; }
+        public string RouteName { get; set; }
+        public string LoopName { get; set; }
         public int StopsCount { get; set; }
         public int? SelectedLoopId { get; set; }
         public List<SelectListItem> AvailableLoops { get; set; } = new List<SelectListItem>();

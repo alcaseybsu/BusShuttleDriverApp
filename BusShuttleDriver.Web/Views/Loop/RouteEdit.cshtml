@@ -1,0 +1,18 @@
+@model BusShuttleDriver.Web.ViewModels.RouteEditViewModel
+
+<h1>Edit Route</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label asp-for="LoopName" class="control-label">Loop Name</label>
+        <input asp-for="LoopName" class="form-control" />
+        <span asp-validation-for="LoopName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Save" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>

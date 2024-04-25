@@ -30,7 +30,6 @@ namespace BusShuttleDriver.Controllers
             var model = new ManagerDashboardViewModel
             {
                 TotalBuses = await _context.Buses.CountAsync(),
-                TotalRoutes = await _context.Routes.CountAsync(),
                 TotalLoops = await _context.Loops.CountAsync(),
                 TotalStops = await _context.Stops.CountAsync(),
                 TotalEntries = await _context.Entries.CountAsync(),

@@ -1,4 +1,4 @@
-@model BusShuttleDriver.Web.ViewModels.RouteCreateModel
+@model BusShuttleDriver.Web.ViewModels.RouteCreateViewModel
 
 @{
     ViewData["Title"] = "Create Route";
@@ -8,12 +8,6 @@
 
 <form asp-action="Create" method="post">
     @Html.AntiForgeryToken()
-
-    <div class="form-group">
-        <label asp-for="RouteName" class="control-label">Route Name</label>
-        <input asp-for="RouteName" class="form-control" />
-        <span asp-validation-for="RouteName" class="text-danger"></span>
-    </div>
 
     <div class="form-group">
         <label asp-for="SelectedLoopId" class="control-label">Select Loop</label>
@@ -39,8 +33,9 @@
     <div>
         <button type="submit" class="btn btn-primary">Create Route</button>
         <a href="@Url.Action("Index", "Route")" class="btn btn-secondary" style="float: center">View Routes</a>
-        <a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary" style="float: right">Back to Dashboard</a>
-        
+        <a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary" style="float: right">Back to
+            Dashboard</a>
+
     </div>
 </form>
 

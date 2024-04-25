@@ -27,19 +27,6 @@ namespace BusShuttleDriver.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Buses",
-                columns: table => new
-                {
-                    BusId = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    BusNumber = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Buses", x => x.BusId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Entries",
                 columns: table => new
                 {
@@ -62,7 +49,7 @@ namespace BusShuttleDriver.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: true)
+                    LoopName = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -112,25 +99,22 @@ namespace BusShuttleDriver.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Routes",
+                name: "Stops",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    RouteName = table.Column<string>(type: "TEXT", nullable: true),
-                    LoopId = table.Column<int>(type: "INTEGER", nullable: true),
-                    BusId = table.Column<int>(type: "INTEGER", nullable: true)
+                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Latitude = table.Column<double>(type: "REAL", nullable: false),
+                    Longitude = table.Column<double>(type: "REAL", nullable: false),
+                    Order = table.Column<int>(type: "INTEGER", nullable: false),
+                    LoopId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Routes", x => x.Id);
+                    table.PrimaryKey("PK_Stops", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Routes_Buses_BusId",
-                        column: x => x.BusId,
-                        principalTable: "Buses",
-                        principalColumn: "BusId");
-                    table.ForeignKey(
-                        name: "FK_Routes_Loops_LoopId",
+                        name: "FK_Stops_Loops_LoopId",
                         column: x => x.LoopId,
                         principalTable: "Loops",
                         principalColumn: "Id",
@@ -244,26 +228,48 @@ namespace BusShuttleDriver.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Stops",
+                name: "Buses",
+                columns: table => new
+                {
+                    BusId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    BusNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    DriverId = table.Column<int>(type: "INTEGER", nullable: true),
+                    SessionId = table.Column<int>(type: "INTEGER", nullable: true),
+                    SessionId1 = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Buses", x => x.BusId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Sessions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Latitude = table.Column<double>(type: "REAL", nullable: false),
-                    Longitude = table.Column<double>(type: "REAL", nullable: false),
-                    RouteId = table.Column<int>(type: "INTEGER", nullable: true),
-                    Order = table.Column<int>(type: "INTEGER", nullable: false)
+                    Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
+                    BusId = table.Column<int>(type: "INTEGER", nullable: false),
+                    LoopId = table.Column<int>(type: "INTEGER", nullable: false),
+                    DriverId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Stops", x => x.Id);
+                    table.PrimaryKey("PK_Sessions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Stops_Routes_RouteId",
-                        column: x => x.RouteId,
-                        principalTable: "Routes",
+                        name: "FK_Sessions_Buses_BusId",
+                        column: x => x.BusId,
+                        principalTable: "Buses",
+                        principalColumn: "BusId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Sessions_Loops_LoopId",
+                        column: x => x.LoopId,
+                        principalTable: "Loops",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -275,59 +281,33 @@ namespace BusShuttleDriver.Data.Migrations
                     Firstname = table.Column<string>(type: "TEXT", nullable: true),
                     Lastname = table.Column<string>(type: "TEXT", nullable: true),
                     AccountId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ActiveRouteSessionId = table.Column<int>(type: "INTEGER", nullable: true)
+                    ActiveSessionId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Drivers", x => x.DriverId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RouteSessions",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    RouteId = table.Column<int>(type: "INTEGER", nullable: false),
-                    BusId = table.Column<int>(type: "INTEGER", nullable: false),
-                    LoopId = table.Column<int>(type: "INTEGER", nullable: false),
-                    StartTime = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DriverId = table.Column<int>(type: "INTEGER", nullable: false),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RouteSessions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RouteSessions_Buses_BusId",
-                        column: x => x.BusId,
-                        principalTable: "Buses",
-                        principalColumn: "BusId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_RouteSessions_Drivers_DriverId",
-                        column: x => x.DriverId,
-                        principalTable: "Drivers",
-                        principalColumn: "DriverId",
+                        name: "FK_Drivers_Sessions_ActiveSessionId",
+                        column: x => x.ActiveSessionId,
+                        principalTable: "Sessions",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_RouteSessions_Loops_LoopId",
-                        column: x => x.LoopId,
-                        principalTable: "Loops",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_RouteSessions_Routes_RouteId",
-                        column: x => x.RouteId,
-                        principalTable: "Routes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Drivers_ActiveRouteSessionId",
+                name: "IX_Buses_DriverId",
+                table: "Buses",
+                column: "DriverId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Buses_SessionId1",
+                table: "Buses",
+                column: "SessionId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Drivers_ActiveSessionId",
                 table: "Drivers",
-                column: "ActiveRouteSessionId",
+                column: "ActiveSessionId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -342,39 +322,19 @@ namespace BusShuttleDriver.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Routes_BusId",
-                table: "Routes",
+                name: "IX_Sessions_BusId",
+                table: "Sessions",
                 column: "BusId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Routes_LoopId",
-                table: "Routes",
+                name: "IX_Sessions_LoopId",
+                table: "Sessions",
                 column: "LoopId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RouteSessions_BusId",
-                table: "RouteSessions",
-                column: "BusId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RouteSessions_DriverId",
-                table: "RouteSessions",
-                column: "DriverId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RouteSessions_LoopId",
-                table: "RouteSessions",
-                column: "LoopId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RouteSessions_RouteId",
-                table: "RouteSessions",
-                column: "RouteId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Stops_RouteId_Order",
+                name: "IX_Stops_LoopId_Order",
                 table: "Stops",
-                columns: new[] { "RouteId", "Order" },
+                columns: new[] { "LoopId", "Order" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -404,20 +364,30 @@ namespace BusShuttleDriver.Data.Migrations
                 unique: true);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Drivers_RouteSessions_ActiveRouteSessionId",
-                table: "Drivers",
-                column: "ActiveRouteSessionId",
-                principalTable: "RouteSessions",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
+                name: "FK_Buses_Drivers_DriverId",
+                table: "Buses",
+                column: "DriverId",
+                principalTable: "Drivers",
+                principalColumn: "DriverId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Buses_Sessions_SessionId1",
+                table: "Buses",
+                column: "SessionId1",
+                principalTable: "Sessions",
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Drivers_RouteSessions_ActiveRouteSessionId",
-                table: "Drivers");
+                name: "FK_Buses_Drivers_DriverId",
+                table: "Buses");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Buses_Sessions_SessionId1",
+                table: "Buses");
 
             migrationBuilder.DropTable(
                 name: "Accounts");
@@ -450,13 +420,10 @@ namespace BusShuttleDriver.Data.Migrations
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "RouteSessions");
-
-            migrationBuilder.DropTable(
                 name: "Drivers");
 
             migrationBuilder.DropTable(
-                name: "Routes");
+                name: "Sessions");
 
             migrationBuilder.DropTable(
                 name: "Buses");

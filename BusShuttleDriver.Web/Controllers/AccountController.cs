@@ -98,7 +98,7 @@ namespace BusShuttleDriver.Web.Controllers
 
             return isFirstUser
                 ? RedirectToAction("Dashboard", "Manager")
-                : RedirectToAction("Start", "Entry");
+                : RedirectToAction("Login", "Account");
         }
 
         [HttpGet]
@@ -115,6 +115,17 @@ namespace BusShuttleDriver.Web.Controllers
         public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl ?? "/";
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
+            {
+                ModelState.AddModelError(string.Empty, "Username and password are required.");
+                return View(model);
+            }
 
             if (ModelState.IsValid)
             {

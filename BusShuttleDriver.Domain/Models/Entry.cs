@@ -8,6 +8,7 @@ namespace BusShuttleDriver.Domain.Models
 {
     public class Entry
     {
+        [Key]
         public int Id { get; set; }
 
         [Display(Name = "Loop")]

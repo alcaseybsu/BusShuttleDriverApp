@@ -1,0 +1,142 @@
+Given your specifications, we will need to redesign the Route creation and management process to ensure that Routes are
+essentially views composed of a Loop and its associated Stops. Since we won't have a dedicated Route model, we'll manage
+and display these relationships directly through the Loop and Stop models.
+
+Steps to Implement
+Modify Loop and Stop Models: Ensure the Loop model can contain multiple Stops, and each Stop knows its position (order)
+within a Loop.
+Adjust Route Management View and Controller:
+Create a method to display a form for constructing a Route. This form will allow a manager to select a Loop and then
+assign and order Stops within that Loop.
+Implement logic to handle the submission of this form, which involves updating the Stop's order within the selected
+Loop.
+Route Index View:
+Modify the Route Index view to list all constructed Routes, displaying them by their Loop and ordered Stops.
+Example Implementation
+1. Controller Methods for Managing Routes
+csharp
+Copy code
+public async Task<IActionResult> CreateRoute()
+    {
+    var viewModel = new RouteCreateViewModel
+    {
+    AvailableLoops = new SelectList(await _context.Loops.ToListAsync(), "Id", "LoopName"),
+    AvailableStops = new SelectList(await _context.Stops.ToListAsync(), "Id", "Name")
+    };
+    return View(viewModel);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateRoute(RouteCreateViewModel viewModel)
+        {
+        if (!ModelState.IsValid)
+        {
+        return View(viewModel);
+        }
+
+        // This assumes the manager selects a loop and multiple stops in order
+        var loop = await _context.Loops.FindAsync(viewModel.SelectedLoopId);
+        if (loop == null)
+        {
+        ModelState.AddModelError("", "Selected Loop is invalid.");
+        return View(viewModel);
+        }
+
+        // Adjust stop orders based on manager's input
+        foreach (var stopOrder in viewModel.SelectedStopOrders)
+        {
+        var stop = await _context.Stops.FindAsync(stopOrder.StopId);
+        if (stop != null && stop.LoopId == viewModel.SelectedLoopId)
+        {
+        stop.Order = stopOrder.Order; // Updating order
+        }
+        }
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction("RouteIndex");
+        }
+        2. ViewModel for Route Creation
+        csharp
+        Copy code
+        public class RouteCreateViewModel
+        {
+        public int? SelectedLoopId { get; set; }
+        public SelectList AvailableLoops { get; set; }
+        public List<StopOrder> SelectedStopOrders { get; set; } = new List<StopOrder>();
+                }
+
+                public class StopOrder
+                {
+                public int StopId { get; set; }
+                public int Order { get; set; }
+                }
+                3. Route Index View
+                csharp
+                Copy code
+                @model IEnumerable<RouteViewModel>
+
+                @{
+                    ViewData["Title"] = "Route Index";
+                }
+
+                <h2>@ViewData["Title"]</h2>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Route ID</th>
+                            <th>Loop</th>
+                            <th>Stops</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var route in Model)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => route.Id)</td>
+                                <td>@Html.DisplayFor(modelItem => route.LoopName)</td>
+                                <td>
+                                    <ul class="list-unstyled">
+                                        @foreach (var stop in route.Stops)
+                                        {
+                                            <li>@stop.Name</li>
+                                        }
+                                    </ul>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <a href="@Url.Action("CreateRoute", "Loop")" class="btn btn-success">Create New Route</a>
+                <a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary" style="float:right">Back to
+                    Dashboard</a>
+
+                @section scripts {
+                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                    <script>
+                        $(document).ready(function () {
+                            $('.delete-route').click(function (e) {
+                                e.preventDefault();
+                                if (confirm('Are you sure you want to delete this route?')) {
+                                    var routeId = $(this).data('route-id');
+                                    $.ajax({
+                                        url: '@Url.Action("Delete", "Route")',
+                                        type: 'POST',
+                                        data: {
+                                            id: routeId,
+                                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                                        },
+                                        success: function (result) {
+                                            location.reload();  // Reload the page to update the list
+                                        },
+                                        error: function (xhr, status, error) {
+                                            alert('Error deleting route: ' + error);
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                    </script>
+                }

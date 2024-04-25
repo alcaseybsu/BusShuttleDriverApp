@@ -1,4 +1,4 @@
-@model BusShuttleDriver.Web.ViewModels.StartRouteViewModel
+@model BusShuttleDriver.Web.ViewModels.StartViewModel
 
 @{
     ViewData["Title"] = "Driver Dashboard";
@@ -15,6 +15,6 @@
             <label for="busSelect" class="h3">Select Bus:</label>
             <select id="busSelect" asp-for="SelectedBusId" asp-items="Model.AvailableBuses" class="form-control form-control-lg"></select>
         </div>
-        <button type="submit" class="btn btn-primary btn-lg btn-block">Start Route</button>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Start</button>
     </form>
 </div>

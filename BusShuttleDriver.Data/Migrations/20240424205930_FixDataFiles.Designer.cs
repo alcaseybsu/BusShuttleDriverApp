@@ -11,14 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BusShuttleDriver.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240421084346_UpdateRouteStops")]
-    partial class UpdateRouteStops
+    [Migration("20240424205930_FixDataFiles")]
+    partial class FixDataFiles
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.3");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
 
             modelBuilder.Entity("BusShuttleDriver.Data.ApplicationUser", b =>
                 {
@@ -100,12 +100,14 @@ namespace BusShuttleDriver.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Password")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Role")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Username")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -119,10 +121,21 @@ namespace BusShuttleDriver.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BusNumber")
+                    b.Property<string>("BusNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("DriverId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SessionId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("BusId");
+
+                    b.HasIndex("DriverId");
+
+                    b.HasIndex("SessionId");
 
                     b.ToTable("Buses");
                 });
@@ -136,7 +149,7 @@ namespace BusShuttleDriver.Data.Migrations
                     b.Property<int>("AccountId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ActiveRouteSessionId")
+                    b.Property<int?>("ActiveSessionId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Firstname")
@@ -147,7 +160,7 @@ namespace BusShuttleDriver.Data.Migrations
 
                     b.HasKey("DriverId");
 
-                    b.HasIndex("ActiveRouteSessionId")
+                    b.HasIndex("ActiveSessionId")
                         .IsUnique();
 
                     b.ToTable("Drivers");
@@ -185,34 +198,16 @@ namespace BusShuttleDriver.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("LoopName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Loops");
+                    b.ToTable("Loops", (string)null);
                 });
 
-            modelBuilder.Entity("BusShuttleDriver.Domain.Models.RouteModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("LoopId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("RouteName")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LoopId");
-
-                    b.ToTable("Routes");
-                });
-
-            modelBuilder.Entity("BusShuttleDriver.Domain.Models.RouteSession", b =>
+            modelBuilder.Entity("BusShuttleDriver.Domain.Models.Session", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -221,7 +216,7 @@ namespace BusShuttleDriver.Data.Migrations
                     b.Property<int>("BusId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("DriverId")
+                    b.Property<int?>("DriverId")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsActive")
@@ -230,23 +225,16 @@ namespace BusShuttleDriver.Data.Migrations
                     b.Property<int>("LoopId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("RouteId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime>("Timestamp")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BusId");
 
-                    b.HasIndex("DriverId");
-
                     b.HasIndex("LoopId");
 
-                    b.HasIndex("RouteId");
-
-                    b.ToTable("RouteSessions");
+                    b.ToTable("Sessions", (string)null);
                 });
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Stop", b =>
@@ -261,6 +249,9 @@ namespace BusShuttleDriver.Data.Migrations
                     b.Property<double>("Longitude")
                         .HasColumnType("REAL");
 
+                    b.Property<int?>("LoopId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -269,15 +260,12 @@ namespace BusShuttleDriver.Data.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("RouteId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("RouteId", "Order")
+                    b.HasIndex("LoopId", "Order")
                         .IsUnique();
 
-                    b.ToTable("Stops");
+                    b.ToTable("Stops", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -408,27 +396,32 @@ namespace BusShuttleDriver.Data.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("BusShuttleDriver.Domain.Models.Bus", b =>
+                {
+                    b.HasOne("BusShuttleDriver.Domain.Models.Driver", "Driver")
+                        .WithMany()
+                        .HasForeignKey("DriverId");
+
+                    b.HasOne("BusShuttleDriver.Domain.Models.Session", "Session")
+                        .WithMany()
+                        .HasForeignKey("SessionId");
+
+                    b.Navigation("Driver");
+
+                    b.Navigation("Session");
+                });
+
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Driver", b =>
                 {
-                    b.HasOne("BusShuttleDriver.Domain.Models.RouteSession", "ActiveRouteSession")
-                        .WithOne()
-                        .HasForeignKey("BusShuttleDriver.Domain.Models.Driver", "ActiveRouteSessionId")
+                    b.HasOne("BusShuttleDriver.Domain.Models.Session", "ActiveSession")
+                        .WithOne("Driver")
+                        .HasForeignKey("BusShuttleDriver.Domain.Models.Driver", "ActiveSessionId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("ActiveRouteSession");
+                    b.Navigation("ActiveSession");
                 });
 
-            modelBuilder.Entity("BusShuttleDriver.Domain.Models.RouteModel", b =>
-                {
-                    b.HasOne("BusShuttleDriver.Domain.Models.Loop", "Loop")
-                        .WithMany("Routes")
-                        .HasForeignKey("LoopId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Loop");
-                });
-
-            modelBuilder.Entity("BusShuttleDriver.Domain.Models.RouteSession", b =>
+            modelBuilder.Entity("BusShuttleDriver.Domain.Models.Session", b =>
                 {
                     b.HasOne("BusShuttleDriver.Domain.Models.Bus", "Bus")
                         .WithMany()
@@ -436,41 +429,25 @@ namespace BusShuttleDriver.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BusShuttleDriver.Domain.Models.Driver", "Driver")
-                        .WithMany()
-                        .HasForeignKey("DriverId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
-
                     b.HasOne("BusShuttleDriver.Domain.Models.Loop", "Loop")
                         .WithMany()
                         .HasForeignKey("LoopId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BusShuttleDriver.Domain.Models.RouteModel", "Route")
-                        .WithMany()
-                        .HasForeignKey("RouteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Bus");
 
-                    b.Navigation("Driver");
-
                     b.Navigation("Loop");
-
-                    b.Navigation("Route");
                 });
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Stop", b =>
                 {
-                    b.HasOne("BusShuttleDriver.Domain.Models.RouteModel", "Route")
+                    b.HasOne("BusShuttleDriver.Domain.Models.Loop", "Loop")
                         .WithMany("Stops")
-                        .HasForeignKey("RouteId")
+                        .HasForeignKey("LoopId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Route");
+                    b.Navigation("Loop");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -526,12 +503,12 @@ namespace BusShuttleDriver.Data.Migrations
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Loop", b =>
                 {
-                    b.Navigation("Routes");
+                    b.Navigation("Stops");
                 });
 
-            modelBuilder.Entity("BusShuttleDriver.Domain.Models.RouteModel", b =>
+            modelBuilder.Entity("BusShuttleDriver.Domain.Models.Session", b =>
                 {
-                    b.Navigation("Stops");
+                    b.Navigation("Driver");
                 });
 #pragma warning restore 612, 618
         }

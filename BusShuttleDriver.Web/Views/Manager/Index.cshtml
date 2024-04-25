@@ -2,7 +2,7 @@
 @model IEnumerable<BusShuttleDriver.Web.ViewModels.DriverViewModel>
 
 <h2>Drivers</h2>
-<a asp-controller="Driver" asp-action="Create" class="btn btn-primary">Create Driver</a>
+
 <table class="table">
     <thead>
         <tr>
@@ -35,6 +35,7 @@
         }
     </tbody>
 </table>
-<div class="col-md-6 text-right">
-    <a href="@Url.Action("Dashboard", "Manager")" class="btn btn-primary mt-2">Back to Dashboard</a>
+<div>
+    <a asp-controller="Driver" asp-action="Create" class="btn btn-primary mt-2">Create Driver</a>
+    <a href="@Url.Action("Dashboard", "Manager")" class="btn btn-primary mt-2" style="float:right">Back to Dashboard</a>
 </div>
