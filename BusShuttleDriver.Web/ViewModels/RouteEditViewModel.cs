@@ -10,13 +10,15 @@ namespace BusShuttleDriver.Web.ViewModels
 
         [Required]
         [Display(Name = "Route Name")]
-        public string? LoopName { get; set; }
+        public string? RouteName { get; set; }
 
         [Required]
         [Display(Name = "Select Loop")]
         public int SelectedLoopId { get; set; }
 
         public SelectList? AvailableLoops { get; set; }
+
+        public SelectList? AvailableStops { get; set; }
 
         public List<StopInfo> Stops { get; set; }
 

@@ -19,12 +19,13 @@ namespace BusShuttleDriver.Data
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Session> Sessions { get; set; }
         public DbSet<Route> Routes { get; set; }
+        public DbSet<RouteStop> RouteStops { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Customize the ASP.NET Identity model and override the defaults if needed
+            // ASP.NET Identity model customization
             modelBuilder.Entity<ApplicationUser>(entity => entity.ToTable(name: "Users"));
             modelBuilder.Entity<IdentityRole>(entity => entity.ToTable(name: "Roles"));
             modelBuilder.Entity<IdentityUserRole<string>>(entity =>
@@ -49,13 +50,11 @@ namespace BusShuttleDriver.Data
                 entity.ToTable("Loops");
                 entity.HasKey(l => l.Id);
                 entity.Property(l => l.LoopName).IsRequired().HasColumnType("TEXT");
-
-                // Define relationship between Loop and Stops
                 entity
                     .HasMany(l => l.Stops)
                     .WithOne(s => s.Loop)
                     .HasForeignKey(s => s.LoopId)
-                    .OnDelete(DeleteBehavior.SetNull); // Set null on Loop delete
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             // Stop properties
@@ -67,8 +66,6 @@ namespace BusShuttleDriver.Data
                 entity.Property(s => s.Latitude).HasColumnType("REAL");
                 entity.Property(s => s.Longitude).HasColumnType("REAL");
                 entity.Property(s => s.Order).HasColumnType("INTEGER");
-
-                // Ensure unique order within the same Loop
                 entity.HasIndex(s => new { s.LoopId, s.Order }).IsUnique();
             });
 
@@ -78,8 +75,6 @@ namespace BusShuttleDriver.Data
                 entity.ToTable("Routes");
                 entity.HasKey(r => r.RouteId);
                 entity.Property(r => r.RouteName).IsRequired().HasMaxLength(100);
-
-                // Define relationship between Route and Loop
                 entity
                     .HasOne(r => r.Loop)
                     .WithMany()
@@ -87,7 +82,24 @@ namespace BusShuttleDriver.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Relationships for Session
+            // Configuration for RouteStop entity
+            modelBuilder.Entity<RouteStop>().HasKey(rs => new { rs.RouteId, rs.StopId });
+
+            modelBuilder
+                .Entity<RouteStop>()
+                .HasOne(rs => rs.Route)
+                .WithMany(r => r.RouteStops)
+                .HasForeignKey(rs => rs.RouteId);
+
+            modelBuilder
+                .Entity<RouteStop>()
+                .HasOne(rs => rs.Stop)
+                .WithMany()
+                .HasForeignKey(rs => rs.StopId); // Ensure you define a navigation property in Stop if needed.
+
+            modelBuilder.Entity<RouteStop>().Property(rs => rs.Order).IsRequired();
+
+            // Configuration for Session
             modelBuilder.Entity<Session>(entity =>
             {
                 entity.ToTable("Sessions");
@@ -99,8 +111,6 @@ namespace BusShuttleDriver.Data
                     .OnDelete(DeleteBehavior.SetNull);
                 entity.HasOne(s => s.Bus).WithMany().HasForeignKey(s => s.BusId);
                 entity.HasOne(s => s.Loop).WithMany().HasForeignKey(s => s.LoopId);
-
-                // Active session in drivers
                 entity
                     .HasOne(s => s.Driver)
                     .WithOne(d => d.ActiveSession)

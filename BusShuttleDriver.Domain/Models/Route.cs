@@ -14,12 +14,11 @@ namespace BusShuttleDriver.Domain.Models
         [Key]
         public int RouteId { get; set; }
 
-        [Required]
         public string? RouteName { get; set; }
 
-        [Required]
         public int LoopId { get; set; }
-        public virtual Loop? Loop { get; set; }
-        public virtual ICollection<Stop> Stops { get; set; } = new List<Stop>();
+        public Loop? Loop { get; set; }
+
+        public virtual ICollection<RouteStop>? RouteStops { get; set; }
     }
 }

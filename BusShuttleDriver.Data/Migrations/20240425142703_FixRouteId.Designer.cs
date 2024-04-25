@@ -3,6 +3,7 @@ using System;
 using BusShuttleDriver.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BusShuttleDriver.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240425142703_FixRouteId")]
+    partial class FixRouteId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
@@ -419,24 +422,6 @@ namespace BusShuttleDriver.Data.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("RouteStop", b =>
-                {
-                    b.Property<int>("RouteId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("StopId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("RouteId", "StopId");
-
-                    b.HasIndex("StopId");
-
-                    b.ToTable("RouteStops");
-                });
-
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Bus", b =>
                 {
                     b.HasOne("BusShuttleDriver.Domain.Models.Driver", "Driver")
@@ -500,7 +485,7 @@ namespace BusShuttleDriver.Data.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("BusShuttleDriver.Domain.Models.Route", "Route")
-                        .WithMany()
+                        .WithMany("Stops")
                         .HasForeignKey("RouteId");
 
                     b.Navigation("Loop");
@@ -559,25 +544,6 @@ namespace BusShuttleDriver.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RouteStop", b =>
-                {
-                    b.HasOne("BusShuttleDriver.Domain.Models.Route", "Route")
-                        .WithMany("RouteStops")
-                        .HasForeignKey("RouteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BusShuttleDriver.Domain.Models.Stop", "Stop")
-                        .WithMany()
-                        .HasForeignKey("StopId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Route");
-
-                    b.Navigation("Stop");
-                });
-
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Loop", b =>
                 {
                     b.Navigation("Stops");
@@ -585,7 +551,7 @@ namespace BusShuttleDriver.Data.Migrations
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Route", b =>
                 {
-                    b.Navigation("RouteStops");
+                    b.Navigation("Stops");
                 });
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Session", b =>

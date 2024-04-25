@@ -26,10 +26,11 @@
         <ul id="sortable">
             @if (Model.AvailableStops != null)
             {
-                foreach (var stop in Model.AvailableStops)
+                @for (int i = 0; i < Model.AvailableStops.Count; i++)
                 {
+                    var stop = Model.AvailableStops[i];
                     <li class="ui-state-default">
-                        <input type="checkbox" name="selectedStopIds" value="@stop.Value" />
+                        <input type="checkbox" name="SelectedStopIds" value="@stop.Value" />
                         @stop.Text
                     </li>
                 }
@@ -47,7 +48,6 @@
 
     </div>
 </form>
-
 
 @section Scripts {
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -82,15 +82,12 @@
         padding-left: 1.5em;
         font-size: 1.4em;
         min-height: 40px;
-        /* Adjust height to fit content */
         cursor: move;
-        /* Cursor indicates the list item is movable */
         border: 1px solid #ccc;
         background-color: #fafafa;
         box-shadow: 2px 2px 5px #888888;
         display: flex;
         align-items: center;
-        /* Centers the checkbox and text vertically */
     }
 
     #sortable li.placeholder {
@@ -101,6 +98,5 @@
 
     #sortable input[type="checkbox"] {
         margin-right: 10px;
-        /* Spacing between checkbox and text */
     }
 </style>
