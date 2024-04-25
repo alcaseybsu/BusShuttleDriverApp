@@ -166,7 +166,7 @@ namespace BusShuttleDriver.Web.Controllers
         }
 
         // GET: Loop/RouteCreate
-        public async Task<IActionResult> CreateRoute()
+        public async Task<IActionResult> RouteCreate()
         {
             var viewModel = new RouteCreateViewModel
             {
@@ -183,7 +183,7 @@ namespace BusShuttleDriver.Web.Controllers
         // POST: Loop/RouteCreate
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateRoute(RouteCreateViewModel viewModel)
+        public async Task<IActionResult> RouteCreate(RouteCreateViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
