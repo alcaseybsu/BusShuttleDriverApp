@@ -24,10 +24,10 @@ namespace BusShuttleDriver.Domain.Models
 
         public int Order { get; set; }
 
-        public int? LoopId { get; set; } // Nullable if stop may not always be in a loop
+        public int? LoopId { get; set; } // Nullable; stop can be independent
         public virtual Loop? Loop { get; set; }
 
-        public int? RouteId { get; set; } // Nullable if stop may not always be on a route
+        public int? RouteId { get; set; }
         public virtual Route? Route { get; set; }
     }
 }

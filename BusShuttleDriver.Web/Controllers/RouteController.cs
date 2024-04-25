@@ -5,7 +5,9 @@ using BusShuttleDriver.Domain.Models;
 using BusShuttleDriver.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Route = BusShuttleDriver.Domain.Models.Route;
 
 namespace BusShuttleDriver.Web.Controllers
 {
@@ -28,7 +30,7 @@ namespace BusShuttleDriver.Web.Controllers
                 .ThenInclude(l => l.Stops)
                 .Select(r => new RouteViewModel
                 {
-                    RouteId = r.RouteId,
+                    Id = r.RouteId,
                     RouteName = r.RouteName,
                     LoopName = r.Loop.LoopName,
                     Stops = r
@@ -51,7 +53,15 @@ namespace BusShuttleDriver.Web.Controllers
         {
             // Populate SelectList for loops
             var loopSelectList = new SelectList(_context.Loops, "Id", "LoopName");
-            return View(new RouteCreateViewModel { AvailableLoops = loopSelectList });
+            var stopSelectList = new SelectList(_context.Stops, "Id", "Name");
+            var stopSelectItems = stopSelectList.ToList(); // Convert SelectList to List<SelectListItem>
+            return View(
+                new RouteCreateViewModel
+                {
+                    AvailableLoops = loopSelectList,
+                    AvailableStops = stopSelectItems
+                }
+            );
         }
 
         // POST: Route/Create
@@ -69,13 +79,13 @@ namespace BusShuttleDriver.Web.Controllers
                     return View(viewModel);
                 }
 
-                var newRoute = new RouteModel
+                var newRoute = new Route
                 {
                     LoopId = loop.Id,
                     RouteName = $"Route {(_context.Routes.Count() + 1)}"
                 };
 
-                _context.Add(newRouteModel);
+                _context.Add(newRoute);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -101,7 +111,7 @@ namespace BusShuttleDriver.Web.Controllers
 
             var viewModel = new RouteEditViewModel
             {
-                Id = route.Id,
+                Id = route.RouteId,
                 SelectedLoopId = route.LoopId,
                 AvailableLoops = new SelectList(_context.Loops, "Id", "LoopName", route.LoopId)
             };
@@ -161,7 +171,7 @@ namespace BusShuttleDriver.Web.Controllers
                 .Where(r => r.RouteId == routeId)
                 .Select(r => new RouteViewModel
                 {
-                    Id = r.Id,
+                    Id = r.RouteId,
                     RouteName = r.RouteName,
                     LoopName = r.Loop.LoopName,
                     Stops = r

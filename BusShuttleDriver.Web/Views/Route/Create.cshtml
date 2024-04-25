@@ -18,13 +18,16 @@
     <div class="form-group">
         <label class="control-label">Select stops. Drag to re-order them.</label>
         <ul id="sortable">
-            @foreach (var stop in Model.AvailableStops)
+            @if (Model.AvailableStops != null)
             {
-                <li class="ui-state-default">
+                foreach (var stop in Model.AvailableStops)
+                {
+                    <li class="ui-state-default">
                     <input type="checkbox" name="selectedStopIds" value="@stop.Value" />
                     @stop.Text
                 </li>
-            }
+                }
+            }            
         </ul>
     </div>
 

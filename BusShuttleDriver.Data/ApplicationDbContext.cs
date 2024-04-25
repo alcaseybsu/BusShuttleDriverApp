@@ -18,7 +18,7 @@ namespace BusShuttleDriver.Data
         public DbSet<Stop> Stops { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Session> Sessions { get; set; }
-        public DbSet<RouteModel> Routes { get; set; }
+        public DbSet<Route> Routes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

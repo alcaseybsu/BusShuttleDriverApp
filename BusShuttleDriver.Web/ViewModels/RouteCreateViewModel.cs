@@ -12,14 +12,20 @@ namespace BusShuttleDriver.Web.ViewModels
         [Display(Name = "Select Loop")]
         public int SelectedLoopId { get; set; }
 
-        public SelectList AvailableLoops { get; set; }
+        [Required(ErrorMessage = "Enter a route name.")]
+        [Display(Name = "Route Name")]
+        public string RouteName { get; set; } = string.Empty;
 
-        public SelectList AvailableStops { get; set; }
+        public SelectList? AvailableLoops { get; set; }
 
-        // IDs of stops in the order they should appear in route
+        public List<SelectListItem> AvailableStops { get; set; }
+
+        //public SelectList? AvailableStops { get; set; }
+
+        // IDs of stops in order in route
         public List<int> OrderedStopIds { get; set; } = new List<int>();
 
-        // Optional: Details of stops to be displayed on RouteCreate view
+        // Details of stops displayed on RouteCreate view
         public List<StopViewModel>? Stops { get; set; }
     }
 }

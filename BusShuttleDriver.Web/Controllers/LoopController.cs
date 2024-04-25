@@ -59,7 +59,13 @@ namespace BusShuttleDriver.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var loop = new Loop { LoopName = viewModel.LoopName };
+                if (string.IsNullOrWhiteSpace(viewModel.LoopName))
+                {
+                    ModelState.AddModelError("LoopName", "Loop name is required.");
+                    return View(viewModel);
+                }
+
+                var loop = new Loop(viewModel.LoopName);
                 _context.Add(loop);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

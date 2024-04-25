@@ -11,10 +11,15 @@ namespace BusShuttleDriver.Domain.Models
 {
     public class Route
     {
+        [Key]
         public int RouteId { get; set; }
-        public string RouteName { get; set; }
+
+        [Required]
+        public string? RouteName { get; set; }
+
+        [Required]
         public int LoopId { get; set; }
-        public virtual Loop Loop { get; set; }
+        public virtual Loop? Loop { get; set; }
         public virtual ICollection<Stop> Stops { get; set; } = new List<Stop>();
     }
 }
