@@ -5,7 +5,6 @@ using BusShuttleDriver.Domain.Models;
 using BusShuttleDriver.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace BusShuttleDriver.Web.Controllers
@@ -139,93 +138,6 @@ namespace BusShuttleDriver.Web.Controllers
             _context.Loops.Remove(loop);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        // GET: RouteIndex
-        public async Task<IActionResult> RouteIndex()
-        {
-            var loops = await _context
-                .Loops.Include(l => l.Stops)
-                .Select(l => new RouteViewModel
-                {
-                    Id = l.Id,
-                    LoopName = l.LoopName,
-                    Stops = l
-                        .Stops.Select(s => new StopViewModel
-                        {
-                            Name = s.Name,
-                            Latitude = s.Latitude,
-                            Longitude = s.Longitude
-                        })
-                        .ToList(),
-                    RouteName = l.LoopName
-                })
-                .ToListAsync();
-
-            return View("RouteIndex", loops);
-        }
-
-        // GET: Loop/RouteCreate
-        public async Task<IActionResult> RouteCreate()
-        {
-            var viewModel = new RouteCreateViewModel
-            {
-                AvailableLoops = new SelectList(
-                    await _context.Loops.ToListAsync(),
-                    "Id",
-                    "LoopName"
-                ),
-                AvailableStops = new SelectList(await _context.Stops.ToListAsync(), "Id", "Name")
-            };
-            return View(viewModel);
-        }
-
-        // POST: Loop/RouteCreate
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RouteCreate(RouteCreateViewModel viewModel)
-        {
-            if (ModelState.IsValid)
-            {
-                var loop = await _context
-                    .Loops.Include(l => l.Stops)
-                    .FirstOrDefaultAsync(l => l.Id == viewModel.SelectedLoopId);
-                if (loop == null)
-                {
-                    ModelState.AddModelError("", "The selected loop does not exist.");
-                    return View(viewModel);
-                }
-
-                // Reset the order for all stops in the loop
-                foreach (var stop in loop.Stops)
-                {
-                    stop.Order = int.MaxValue; // Set a high order value to ensure it goes to the end if not included in the new order list
-                }
-
-                // Update the order of stops based on the provided list
-                int order = 1;
-                foreach (var stopId in viewModel.OrderedStopIds)
-                {
-                    var stop = loop.Stops.FirstOrDefault(s => s.Id == stopId);
-                    if (stop != null)
-                    {
-                        stop.Order = order++;
-                    }
-                }
-
-                // Save the updated order
-                await _context.SaveChangesAsync();
-                return RedirectToAction("RouteIndex"); // Assuming RouteIndex is the view that lists all "routes"
-            }
-
-            // Re-populate the AvailableLoops if returning to the form
-            viewModel.AvailableLoops = new SelectList(
-                await _context.Loops.ToListAsync(),
-                "Id",
-                "LoopName",
-                viewModel.SelectedLoopId
-            );
-            return View(viewModel);
         }
     }
 }

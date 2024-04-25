@@ -14,8 +14,14 @@ namespace BusShuttleDriver.Domain.Models
         public int Id { get; set; }
 
         [Required]
-        public string? LoopName { get; set; } = string.Empty;
+        public string LoopName { get; set; }
 
-        public ICollection<Stop> Stops { get; set; } = new List<Stop>(); // Stops on the loop
+        public virtual ICollection<Stop> Stops { get; set; } = new List<Stop>();
+
+        // Constructor with required LoopName
+        public Loop(string loopName)
+        {
+            LoopName = loopName ?? throw new ArgumentNullException(nameof(loopName));
+        }
     }
 }

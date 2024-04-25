@@ -18,6 +18,7 @@ namespace BusShuttleDriver.Data
         public DbSet<Stop> Stops { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Session> Sessions { get; set; }
+        public DbSet<RouteModel> Routes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -47,14 +48,14 @@ namespace BusShuttleDriver.Data
             {
                 entity.ToTable("Loops");
                 entity.HasKey(l => l.Id);
-                entity.Property(l => l.LoopName).HasColumnType("TEXT");
+                entity.Property(l => l.LoopName).IsRequired().HasColumnType("TEXT");
 
                 // Define relationship between Loop and Stops
                 entity
                     .HasMany(l => l.Stops)
                     .WithOne(s => s.Loop)
                     .HasForeignKey(s => s.LoopId)
-                    .OnDelete(DeleteBehavior.SetNull); // Modify according to your deletion rules
+                    .OnDelete(DeleteBehavior.SetNull); // Set null on Loop delete
             });
 
             // Stop properties
@@ -66,25 +67,27 @@ namespace BusShuttleDriver.Data
                 entity.Property(s => s.Latitude).HasColumnType("REAL");
                 entity.Property(s => s.Longitude).HasColumnType("REAL");
                 entity.Property(s => s.Order).HasColumnType("INTEGER");
-                entity.HasIndex(s => new { s.LoopId, s.Order }).IsUnique(); // Unique order within the same Loop
+
+                // Ensure unique order within the same Loop
+                entity.HasIndex(s => new { s.LoopId, s.Order }).IsUnique();
             });
 
             // Relationships for Session
             modelBuilder.Entity<Session>(entity =>
             {
                 entity.ToTable("Sessions");
-                entity.HasKey(rs => rs.Id);
+                entity.HasKey(s => s.Id);
                 entity
-                    .HasOne(rs => rs.Driver)
+                    .HasOne(s => s.Driver)
                     .WithMany()
-                    .HasForeignKey(rs => rs.DriverId)
+                    .HasForeignKey(s => s.DriverId)
                     .OnDelete(DeleteBehavior.SetNull);
-                entity.HasOne(rs => rs.Bus).WithMany().HasForeignKey(rs => rs.BusId);
-                entity.HasOne(rs => rs.Loop).WithMany().HasForeignKey(rs => rs.LoopId);
+                entity.HasOne(s => s.Bus).WithMany().HasForeignKey(s => s.BusId);
+                entity.HasOne(s => s.Loop).WithMany().HasForeignKey(s => s.LoopId);
 
                 // Active session in drivers
                 entity
-                    .HasOne(rs => rs.Driver)
+                    .HasOne(s => s.Driver)
                     .WithOne(d => d.ActiveSession)
                     .HasForeignKey<Driver>(d => d.ActiveSessionId)
                     .OnDelete(DeleteBehavior.SetNull);

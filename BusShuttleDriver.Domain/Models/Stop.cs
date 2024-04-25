@@ -14,7 +14,7 @@ namespace BusShuttleDriver.Domain.Models
         public int Id { get; set; }
 
         [Required, StringLength(100)]
-        public string? Name { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
 
         [Required]
         public double Latitude { get; set; }
@@ -24,8 +24,10 @@ namespace BusShuttleDriver.Domain.Models
 
         public int Order { get; set; }
 
-        public int? LoopId { get; set; } // Make nullable
-
+        public int? LoopId { get; set; } // Nullable if stop may not always be in a loop
         public virtual Loop? Loop { get; set; }
+
+        public int? RouteId { get; set; } // Nullable if stop may not always be on a route
+        public virtual Route? Route { get; set; }
     }
 }

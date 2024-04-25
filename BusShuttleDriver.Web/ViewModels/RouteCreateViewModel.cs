@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -16,24 +15,11 @@ namespace BusShuttleDriver.Web.ViewModels
         public SelectList AvailableLoops { get; set; }
 
         public SelectList AvailableStops { get; set; }
+
+        // IDs of stops in the order they should appear in route
         public List<int> OrderedStopIds { get; set; } = new List<int>();
+
+        // Optional: Details of stops to be displayed on RouteCreate view
         public List<StopViewModel>? Stops { get; set; }
-
-        // Constructor
-        public RouteCreateViewModel()
-        {
-            var loops = GetLoops();
-            AvailableLoops = new SelectList(loops, "Value", "Text");
-        }
-
-        private List<SelectListItem> GetLoops()
-        {
-            return new List<SelectListItem>
-            {
-                new SelectListItem { Value = "1", Text = "Loop 1" },
-                new SelectListItem { Value = "2", Text = "Loop 2" },
-                // Add more loops as necessary
-            };
-        }
     }
 }
