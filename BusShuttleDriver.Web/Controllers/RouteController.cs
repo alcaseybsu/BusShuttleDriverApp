@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Route = BusShuttleDriver.Domain.Models.Route;
 
 namespace BusShuttleDriver.Web.Controllers
@@ -15,10 +16,12 @@ namespace BusShuttleDriver.Web.Controllers
     public class RouteController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<RouteController> _logger;
 
-        public RouteController(ApplicationDbContext context)
+        public RouteController(ApplicationDbContext context, ILogger<RouteController> logger)
         {
             _context = context;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         // GET: Routes for Manager
@@ -51,17 +54,29 @@ namespace BusShuttleDriver.Web.Controllers
         [Authorize(Roles = "Manager")]
         public IActionResult Create()
         {
-            // Populate SelectList for loops
-            var loopSelectList = new SelectList(_context.Loops, "Id", "LoopName");
-            var stopSelectList = new SelectList(_context.Stops, "Id", "Name");
-            var stopSelectItems = stopSelectList.ToList(); // Convert SelectList to List<SelectListItem>
-            return View(
-                new RouteCreateViewModel
-                {
-                    AvailableLoops = loopSelectList,
-                    AvailableStops = stopSelectItems
-                }
-            );
+            try
+            {
+                // Populate SelectList for loops
+                var loopSelectList = new SelectList(_context.Loops, "Id", "LoopName");
+                var stopSelectList = new SelectList(_context.Stops, "Id", "Name");
+                var stopSelectItems = stopSelectList.ToList(); // Convert SelectList to List<SelectListItem>
+
+                return View(
+                    new RouteCreateViewModel
+                    {
+                        AvailableLoops = loopSelectList,
+                        AvailableStops = stopSelectItems
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    "Failed to load data for route creation form: {Error}",
+                    ex.Message
+                );
+                return View("Error"); // Consider redirecting to a generic error page or display a friendly error message
+            }
         }
 
         // POST: Route/Create
@@ -70,26 +85,77 @@ namespace BusShuttleDriver.Web.Controllers
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> Create(RouteCreateViewModel viewModel)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var loop = await _context.Loops.FindAsync(viewModel.SelectedLoopId);
-                if (loop == null)
-                {
-                    ModelState.AddModelError("", "Selected loop does not exist.");
-                    return View(viewModel);
-                }
+                // Log the state of the model if it's invalid
+                _logger.LogWarning(
+                    "Model state is invalid. Errors: {ModelStateErrors}",
+                    string.Join(
+                        "; ",
+                        ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+                    )
+                );
 
-                var newRoute = new Route
-                {
-                    LoopId = loop.Id,
-                    RouteName = $"Route {(_context.Routes.Count() + 1)}"
-                };
+                // Re-populate the SelectList if returning to the form
+                viewModel.AvailableLoops = new SelectList(_context.Loops, "Id", "LoopName");
+                return View(viewModel);
+            }
 
-                _context.Add(newRoute);
-                await _context.SaveChangesAsync();
+            var loop = await _context.Loops.FindAsync(viewModel.SelectedLoopId);
+            if (loop == null)
+            {
+                _logger.LogError("Loop with ID {LoopId} not found.", viewModel.SelectedLoopId);
+
+                ModelState.AddModelError("", "Selected loop does not exist.");
+                viewModel.AvailableLoops = new SelectList(_context.Loops, "Id", "LoopName");
+                return View(viewModel);
+            }
+
+            var newRoute = new Route { LoopId = loop.Id, RouteName = viewModel.RouteName };
+            _context.Routes.Add(newRoute);
+
+            _logger.LogInformation(
+                "Attempting to add new route to the database: {RouteName}",
+                newRoute.RouteName
+            );
+            _logger.LogInformation(
+                "New route entity state before saving: {State}",
+                _context.Entry(newRoute).State
+            );
+
+            try
+            {
+                var changes = await _context.SaveChangesAsync();
+                _logger.LogInformation(
+                    "{Changes} changes saved to the database. Route added successfully.",
+                    changes
+                );
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(viewModel);
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(
+                    "Error saving route: {Error}. Exception: {ExceptionMessage}",
+                    ex.ToString(),
+                    ex.Message
+                );
+                ModelState.AddModelError("", "Failed to save the route. Please try again.");
+
+                // Re-populate the SelectList for recovery from failure
+                viewModel.AvailableLoops = new SelectList(_context.Loops, "Id", "LoopName");
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    "An unexpected error occurred while saving the route: {ExceptionMessage}",
+                    ex.Message
+                );
+                ModelState.AddModelError("", "An unexpected error occurred. Please try again.");
+                viewModel.AvailableLoops = new SelectList(_context.Loops, "Id", "LoopName");
+                return View(viewModel);
+            }
         }
 
         // GET: Route/Edit/5

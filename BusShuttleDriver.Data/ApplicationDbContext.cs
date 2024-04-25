@@ -72,6 +72,21 @@ namespace BusShuttleDriver.Data
                 entity.HasIndex(s => new { s.LoopId, s.Order }).IsUnique();
             });
 
+            // Configuration for Route entity
+            modelBuilder.Entity<Route>(entity =>
+            {
+                entity.ToTable("Routes");
+                entity.HasKey(r => r.RouteId);
+                entity.Property(r => r.RouteName).IsRequired().HasMaxLength(100);
+
+                // Define relationship between Route and Loop
+                entity
+                    .HasOne(r => r.Loop)
+                    .WithMany()
+                    .HasForeignKey(r => r.LoopId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             // Relationships for Session
             modelBuilder.Entity<Session>(entity =>
             {

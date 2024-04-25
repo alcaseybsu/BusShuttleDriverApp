@@ -17,31 +17,34 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var route in Model)
+        @if (Model != null && Model.Any())
+        {
+            foreach (var route in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => route.RouteName)</td>
+                    <td>@Html.DisplayFor(modelItem => route.LoopName)</td>
+                    <td>
+                        <!-- Example actions -->
+                        <a asp-action="Edit" asp-route-id="@route.Id" class="btn btn-primary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@route.Id" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
         {
             <tr>
-                <td>@Html.DisplayFor(modelItem => route.RouteName)</td>
-                <td>@Html.DisplayFor(modelItem => route.LoopName)</td>
-                <td>
-                    <ul class="list-unstyled">
-                        @foreach (var stop in route.Stops)
-                        {
-                            <li>@stop.Name</li>
-                        }
-                    </ul>
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@route.Id" class="btn btn-secondary">Edit</a>
-                    <button type="button" class="btn btn-danger delete-route" data-route-id="@route.Id">Delete</button>
-                </td>
+                <td colspan="3">No routes available.</td>
             </tr>
         }
     </tbody>
 </table>
+</table>
 <div>
     <!-- Link to Create Route -->
-<a asp-action="Create" class="btn btn-success">Create New Route</a>
-<a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary" style="float:right">Back to Dashboard</a>
+    <a asp-action="Create" class="btn btn-success">Create New Route</a>
+    <a href="@Url.Action("Dashboard", "Manager")" class="btn btn-secondary" style="float:right">Back to Dashboard</a>
 </div>
 
 

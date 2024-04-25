@@ -215,13 +215,14 @@ namespace BusShuttleDriver.Data.Migrations
 
                     b.Property<string>("RouteName")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.HasKey("RouteId");
 
                     b.HasIndex("LoopId");
 
-                    b.ToTable("Routes");
+                    b.ToTable("Routes", (string)null);
                 });
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Session", b =>

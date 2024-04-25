@@ -8,13 +8,13 @@ namespace BusShuttleDriver.Web.ViewModels
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Select a loop.")]
-        [Display(Name = "Select Loop")]
-        public int SelectedLoopId { get; set; }
-
         [Required(ErrorMessage = "Enter a route name.")]
         [Display(Name = "Route Name")]
         public string RouteName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Select a loop.")]
+        [Display(Name = "Select Loop")]
+        public int SelectedLoopId { get; set; }
 
         public SelectList? AvailableLoops { get; set; }
 

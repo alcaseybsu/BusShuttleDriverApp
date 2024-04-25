@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BusShuttleDriver.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240425102133_AddRouteIdCoulmn")]
-    partial class AddRouteIdCoulmn
+    [Migration("20240425123838_FixRouteTable")]
+    partial class FixRouteTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -218,13 +218,14 @@ namespace BusShuttleDriver.Data.Migrations
 
                     b.Property<string>("RouteName")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.HasKey("RouteId");
 
                     b.HasIndex("LoopId");
 
-                    b.ToTable("Routes");
+                    b.ToTable("Routes", (string)null);
                 });
 
             modelBuilder.Entity("BusShuttleDriver.Domain.Models.Session", b =>
