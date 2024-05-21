@@ -14,12 +14,12 @@ Additional enhancements include publishing the application on an EC2 instance an
 
 ## 🚧 Features Not Yet Added: 🚧
 
-- ** Testing  
-- ** Adding Stops and Loops to Routes  
-- ** Entry logging  
-- ** Updated CSS styling  
-- ** EC2 instance  
-- ** Google Maps itegration  
+- **Testing  
+- **Adding Stops and Loops to Routes  
+- **Entry logging  
+- **Updated CSS styling  
+- **EC2 instance  
+- **Google Maps itegration  
 
 ***Password Requirements***  
 - at least 8 characters  
