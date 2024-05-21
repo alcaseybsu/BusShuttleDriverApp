@@ -12,7 +12,7 @@ This project is a re-engineered version of an existing .NET application designed
 
 Additional enhancements include publishing the application on an EC2 instance and integrating Google Maps to visualize bus routes and the most crowded stops.
 
-🚧 ## Features Not Yet Added: 🚧
+## 🚧 Features Not Yet Added: 🚧
 
 - ** Testing  
 - ** Adding Stops and Loops to Routes  
