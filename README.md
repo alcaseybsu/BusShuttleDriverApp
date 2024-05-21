@@ -21,7 +21,7 @@ Additional enhancements include publishing the application on an EC2 instance an
 - EC2 instance  
 - Google Maps integration  
 
-***Password Requirements***  
+## Password Requirements ##  
 - at least 8 characters  
 - at least one uppercase letter  
 - at least one numeral  
