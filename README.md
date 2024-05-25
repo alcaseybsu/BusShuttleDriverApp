@@ -1,6 +1,6 @@
 ## About This Project
 
-This project is a re-engineered version of an existing .NET application designed to manage a bus shuttle system. The primary goal is to enhance the system with new functionalities, improve its performance, and ensure a robust, scalable architecture. Key features include:
+This project is a re-engineered .NET version of an existing PHP application designed to manage a bus shuttle system. The primary goal is to enhance the system with new functionalities, improve its performance, and ensure a robust, scalable architecture. Key features include:
 
 - **Manager Interface**: Allows managers to perform CRUD operations on various entities, view comprehensive reports, and manage user activations.
 - **Driver Interface**: Enables drivers to select routes, log entries for each stop, and automatically advance the stop dropdown for efficient data submission.
